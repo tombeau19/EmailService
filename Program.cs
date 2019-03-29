@@ -19,6 +19,7 @@ namespace BrontoTransactionalEndpoint
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseIIS()
                 .UseStartup<Startup>();
     }
 }
