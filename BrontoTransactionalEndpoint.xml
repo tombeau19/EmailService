@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BrontoTransactionalEndpoint</name>
+    </assembly>
+    <members>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.OrderConfirmation(BrontoLibrary.Models.Order)">
+            <summary>
+            Sends an Order Confirmation Email via the Bronto Platform
+            </summary>
+            <remarks>returns a string with the details of the Email Send attempt</remarks>
+            <param name="orderInput">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
+        </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.UpdateContact(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            Updates a contact in Bronto
+            </summary>
+            <remarks>returns a string with the details of the updateContact call</remarks>
+            <param name="contact">A Json object of the contact you wish to update. Fields that get updated: SalesRepFirstName, SalesRepLastName, SalesRepDirectLine, SalesRepImageUrlSmall, SalesRepImageUrlLarge, SalesRepEmail, SalesRepTitle, CallLogTimeStamp</param>
+        </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.OrderConfirmationGet(System.String)">
+            <summary>
+            Testing purposes only
+            </summary>
+        </member>
+    </members>
+</doc>

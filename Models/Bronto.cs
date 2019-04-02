@@ -5,19 +5,20 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using BrontoLibrary.Models;
+using BrontoLibrary;
+using BrontoTransactionalEndpoint.Controllers;
 
 namespace BrontoTransactionalEndpoint.Models
 {
     public class Bronto
     {
-        internal static string OrderConfirmation(string orderString)
+        internal static string OrderConfirmation(Order order)
         {
-            JObject orderJson = JObject.Parse(orderString);
-            Order order = new Order(orderJson);
+            BrontoConnector.DeliveryType deliveryType = BrontoConnector.DeliveryType.transactional;
 
             if (order.SupplyNow == true)
             {
-                var brontoResult = BrontoLibrary.BrontoConnector.SendOrderConfirmationEmail("0bdb03eb0000000000000000000000106807", "test", order).Result;
+                var brontoResult = BrontoConnector.SendOrderConfirmationEmail("0bdb03eb0000000000000000000000106807", deliveryType, order).Result;
 
                 if (brontoResult.results[0].errorCode != 0)
                 {
@@ -40,7 +41,21 @@ namespace BrontoTransactionalEndpoint.Models
             }
             else
             {
-                return "invalid values";
+                return $"Invalid request. No email sent to {order.Email}";
+            }
+        }
+
+        internal static string UpdateContact(JObject contact)
+        {
+            JObject brontoResult = BrontoConnector.UpdateContact(contact).Result;
+
+            if ((bool)brontoResult["isError"] == true)
+            {
+                return $"UpdateContact failed for {(string)contact["Email"]}. ErrorCode: {(int)brontoResult["errorCode"]}. ErrorString: {(string)brontoResult["errorString"]}.";
+            }
+            else
+            {
+                return $"{(string)contact["Email"]} successfully updated";
             }
         }
     }

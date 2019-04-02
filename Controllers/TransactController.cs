@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BrontoTransactionalEndpoint.Models;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using BrontoLibrary.Models;
 
 namespace BrontoTransactionalEndpoint.Controllers
 {
@@ -10,13 +12,33 @@ namespace BrontoTransactionalEndpoint.Controllers
     {
 
         // POST api/OrderConfirmation
+        /// <summary>
+        /// Sends an Order Confirmation Email via the Bronto Platform
+        /// </summary>
+        /// <remarks>returns a string with the details of the Email Send attempt</remarks>
+        /// <param name="orderInput">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
         [HttpPost("OrderConfirmation")]
-        public Order OrderConfirmation(Order input)
+        public string OrderConfirmation(Order orderInput)
         {
-            //return Bronto.OrderConfirmation(input);
-            return input;
+            return Bronto.OrderConfirmation(orderInput);
         }
 
+        // POST api/UpdateContact
+        /// <summary>
+        /// Updates a contact in Bronto
+        /// </summary>
+        /// <remarks>returns a string with the details of the updateContact call</remarks>
+        /// <param name="contact">A Json object of the contact you wish to update. Fields that get updated: SalesRepFirstName, SalesRepLastName, SalesRepDirectLine, SalesRepImageUrlSmall, SalesRepImageUrlLarge, SalesRepEmail, SalesRepTitle, CallLogTimeStamp</param>
+        [HttpPost("UpdateContact")]
+        public string UpdateContact(JObject contact)
+        {
+            return Bronto.UpdateContact(contact);
+        }
+
+        // Get api/OrderConfirmationGet
+        /// <summary>
+        /// Testing purposes only
+        /// </summary>
         [HttpGet("OrderConfirmationGet/{orderString}")]
         public string OrderConfirmationGet(string orderString)
         {
@@ -25,46 +47,4 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
     }
 
-    public class Order
-    {
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Company { get; set; }
-        public string ShipAttn { get; set; }
-        public string ShipName { get; set; }
-        public string ShipAddress { get; set; }
-        public string ShipAddress2 { get; set; }
-        public string ShipCity { get; set; }
-        public string ShipState { get; set; }
-        public string ShipZip { get; set; }
-        public string ShipCountry { get; set; }
-        public string BillName { get; set; }
-        public string BillAddress { get; set; }
-        public string BillAddress2 { get; set; }
-        public string BillCity { get; set; }
-        public string BillState { get; set; }
-        public string BillZip { get; set; }
-        public string BillCountry { get; set; }
-        public string OrderNumber { get; set; }
-        public string OrderDate { get; set; }
-        public string Total { get; set; }
-        public string SubTotal { get; set; }
-        public string Tax { get; set; }
-        public string Shipping { get; set; }
-        public string OnlineSummaryLink { get; set; }
-        public List<LineItem> LineItems { get; set; }
-    }
-    public class LineItem
-    {
-        public string Description { get; set; }
-        public int Quantity { get; set; }
-        public double Price { get; set; }
-        public string ShippingMessage { get; set; }
-        public string Note { get; set; }
-        public string ImageUrl { get; set; }
-        public string Discount { get; set; }
-        public bool BackOrdered { get; set; }
-        public bool ListSection { get; set; }
-    }
 }
