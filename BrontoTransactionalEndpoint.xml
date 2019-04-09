@@ -4,24 +4,40 @@
         <name>BrontoTransactionalEndpoint</name>
     </assembly>
     <members>
-        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.OrderConfirmation(BrontoLibrary.Models.Order)">
-            <summary>
-            Sends an Order Confirmation Email via the Bronto Platform
-            </summary>
-            <remarks>returns a string with the details of the Email Send attempt</remarks>
-            <param name="orderInput">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
-        </member>
-        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.UpdateContact(Newtonsoft.Json.Linq.JObject)">
+        <member name="M:BrontoTransactionalEndpoint.Controllers.SyncController.UpdateContact(Newtonsoft.Json.Linq.JObject)">
             <summary>
             Updates a contact in Bronto
             </summary>
             <remarks>returns a string with the details of the updateContact call</remarks>
-            <param name="contact">A Json object of the contact you wish to update. Fields that get updated: SalesRepFirstName, SalesRepLastName, SalesRepDirectLine, SalesRepImageUrlSmall, SalesRepImageUrlLarge, SalesRepEmail, SalesRepTitle, CallLogTimeStamp</param>
+            <param name="contact">A Json object of the contact you wish to update. Json object field names to send: SalesRepFirstName, SalesRepLastName, SalesRepDirectLine, SalesRepImageUrlSmall, SalesRepImageUrlLarge, SalesRepEmail, SalesRepTitle, CallLogTimeStamp</param>
         </member>
-        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.OrderConfirmationGet(System.String)">
+        <member name="M:BrontoTransactionalEndpoint.Controllers.SyncController.UpdateSalesRep(Newtonsoft.Json.Linq.JObject)">
             <summary>
-            Testing purposes only
+            When Changes are made to Sales Rep(ie. name change, directline change, etc.). This method updates all the Rep's customers in Bronto
             </summary>
+            <remarks>returns a string with the number of successful updates and number of failed updates</remarks>
+            <param name="repWithCustomers">A Json object with the new sales rep info and a string array of all customers beloning to said rep. Field names to send: SalesRepFirstName, SalesRepLastName, SalesRepDirectLine, SalesRepImageUrlSmall, SalesRepImageUrlLarge, SalesRepEmail, SalesRepTitle</param>
+        </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.OrderConfirmation(BrontoLibrary.Models.Order)">
+            <summary>
+            Sends an Order Confirmation Email. The template used is based on the order being SUPPLYnow(bool), Pro(Department == "29"), or D2C(Department == "27").
+            </summary>
+            <remarks>returns a string with the details of the Email Send attempt</remarks>
+            <param name="order">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
+        </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.PasswordReset(BrontoLibrary.Models.Customer)">
+            <summary>
+            Sends Password Reset Email. The template used is based on the customer value IsPro(bool).
+            </summary>
+            <remarks>returns a string with the details of the Email Send attempt</remarks>
+            <param name="customer">For field names and datatypes, please reference BrontoLibrary Customer Model. Customer Email and IsPro are mandatory</param>
+        </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.PasswordUpdate(BrontoLibrary.Models.Customer)">
+            <summary>
+            Notifies user their password has been updated. The template used is based on the customer value IsPro(bool).
+            </summary>
+            <remarks>returns a string with the details of the Email Send attempt</remarks>
+            <param name="customer">**This email does not have dynamic fields in the template, customer Email and IsPro are only mandatory fields**</param>
         </member>
     </members>
 </doc>
