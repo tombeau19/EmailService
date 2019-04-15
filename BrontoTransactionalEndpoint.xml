@@ -25,19 +25,33 @@
             <remarks>returns a string with the details of the Email Send attempt</remarks>
             <param name="order">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
         </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.EstimateEmail(BrontoLibrary.Models.Estimate)">
+            <summary>
+            Sends an Estimate Email. The template used is based on the estimate being for a  Pro(Department == "29") or D2C(Department == "27").
+            </summary>
+            <remarks>returns a string with the details of the Email Send attempt</remarks>
+            <param name="estimate">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
+        </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.PasswordReset(BrontoLibrary.Models.Customer)">
             <summary>
             Sends Password Reset Email. The template used is based on the customer value IsPro(bool).
             </summary>
             <remarks>returns a string with the details of the Email Send attempt</remarks>
-            <param name="customer">For field names and datatypes, please reference BrontoLibrary Customer Model. Customer Email and IsPro are mandatory</param>
+            <param name="customer">Customer Email, IsPro, and Token are mandatory</param>
         </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.PasswordUpdate(BrontoLibrary.Models.Customer)">
             <summary>
             Notifies user their password has been updated. The template used is based on the customer value IsPro(bool).
             </summary>
             <remarks>returns a string with the details of the Email Send attempt</remarks>
-            <param name="customer">**This email does not have dynamic fields in the template, customer Email and IsPro are only mandatory fields**</param>
+            <param name="customer">**This email does not have dynamic fields in the template, Customer Email and IsPro are only mandatory fields**</param>
+        </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.AccountElevation(BrontoLibrary.Models.Customer)">
+            <summary>
+            Sends an Account Elevation Email.
+            </summary>
+            <remarks>returns a string with the details of the Email Send attempt</remarks>
+            <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
         </member>
     </members>
 </doc>
