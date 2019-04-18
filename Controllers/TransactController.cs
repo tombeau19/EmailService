@@ -22,7 +22,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         /// <summary>
-        /// Sends an Estimate Email. The template used is based on the estimate being for a  Pro(Department == "29") or D2C(Department == "27").
+        /// Sends an Estimate Email. The template used is based on the estimate being for a Pro(Department == "29") or D2C(Department == "27").
         /// </summary>
         /// <remarks>returns a string with the details of the Email Send attempt</remarks>
         /// <param name="estimate">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
@@ -30,6 +30,17 @@ namespace BrontoTransactionalEndpoint.Controllers
         public string EstimateEmail(Estimate estimate)
         {
             return Transact.EstimateEmail(estimate);
+        }
+
+        /// <summary>
+        /// Sends a Shipping Confirmation Email. The template used is based on the estimate being for a Pro(Department == "29") or D2C(Department == "27").
+        /// </summary>
+        /// <remarks>returns a string with the details of the Email Send attempt</remarks>
+        /// <param name="order">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
+        [HttpPost("ShippingConfirmation")]
+        public string ShippingConfirmation(Order order)
+        {
+            return Transact.ShippingConfirmation(order);
         }
 
         /// <summary>

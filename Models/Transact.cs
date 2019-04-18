@@ -14,6 +14,7 @@ namespace BrontoTransactionalEndpoint.Models
     //Templat IDs have their corresponding names in the Bronto Platform commented above them
     public class Transact
     {
+
         internal static string OrderConfirmation(Order order)
         {
             BrontoConnector.DeliveryType deliveryType = BrontoConnector.DeliveryType.transactional;
@@ -23,6 +24,9 @@ namespace BrontoTransactionalEndpoint.Models
                 //SUPPLYnow Order Confirmation
                 var brontoResult = BrontoConnector.SendOrderConfirmationEmail("0bdb03eb0000000000000000000000106807", deliveryType, order).Result;
                 var result = EmailResult(brontoResult, order);
+                if (result.Contains("Failed"))
+                {
+                }
                 return result;
             }
             else if (order.Department == "29")
@@ -64,6 +68,28 @@ namespace BrontoTransactionalEndpoint.Models
             else
             {
                 return $"Invalid request. Department likely not set. No email sent to {estimate.Email}";
+            }
+        }
+
+        internal static string ShippingConfirmation(Order order)
+        {
+            if (order.Department == "29")
+            {
+                //SUPPLY.com Shipping Confirmation - PRO
+                var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "f3703ac72ea42b799b45cec77e8007c2").Result;
+                var result = EmailResult(brontoResult, order);
+                return result;
+            }
+            else if (order.Department == "27")
+            {
+                //SUPPLY.com Shipping Confirmation - PRO
+                var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "ed24176d6796a12b4b23514c932ec598").Result;
+                var result = EmailResult(brontoResult, order);
+                return result;
+            }
+            else
+            {
+                return $"Invalid request. Department likely not set. No email sent to {order.Email}";
             }
         }
 
@@ -164,6 +190,19 @@ namespace BrontoTransactionalEndpoint.Models
             else
             {
                 string success = $"Success, Email Sent to {estimate.Email}";
+                return success;
+            }
+        }
+        private static string EmailResult(JObject brontoResult, Order order)
+        {
+            if ((int)brontoResult["errorCode"] != 0)
+            {
+                string error = $"Email Failed for {order.Email}. Error Code: {(int)brontoResult["errorCode"]}. Error String: {(string)brontoResult["errorString"]}";
+                return error;
+            }
+            else
+            {
+                string success = $"Success, Email Sent to {order.Email}";
                 return success;
             }
         }

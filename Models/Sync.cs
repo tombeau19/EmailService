@@ -30,7 +30,7 @@ namespace BrontoTransactionalEndpoint.Models
         internal static string UpdateSalesRep(JObject repWithCustomers)
         {
             //TODO figure out error handling with this bad boy
-            return  BrontoConnector.UpdateSalesRep(repWithCustomers).Result;
+            return BrontoConnector.UpdateSalesRep(repWithCustomers).Result;
         }
     }
 }
