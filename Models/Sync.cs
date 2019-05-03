@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using System.Data;
+using System.Data.SqlClient;
 using BrontoLibrary.Models;
 using BrontoLibrary;
 using BrontoReference;
@@ -27,10 +29,35 @@ namespace BrontoTransactionalEndpoint.Models
             }
         }
 
-        internal static string UpdateSalesRep(JObject repWithCustomers)
+        internal static int UpdateSalesRep(JObject repData)
         {
-            //TODO figure out error handling with this bad boy
-            return BrontoConnector.UpdateSalesRep(repWithCustomers).Result;
+            DateTime date = DateTime.Now;
+            var updateDate = date.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            var repId = repData["repId"].ToString();
+            var repFirstName = repData["newRepFN"].ToString();
+            var repLastName = repData["newRepLN"].ToString();
+            var repEmail = repData["newRepEmail"].ToString();
+            var repDirectLine = repData["newRepDL"].ToString();
+            var repTitle = repData["newRepTitle"].ToString();
+            var repImageURL_small = repData["newRepIURL"].ToString();
+            var repImageURL_large = repData["newRepIURL2"].ToString();
+            int updatedInBronto = 0;
+            int CountOfCustomers = 0;
+            int CustomersUpdated = 0;
+
+            SqlConnection repConnection = new SqlConnection("Data Source=srv-pro-sqls-02;Initial Catalog=BRONTO;Integrated Security=True");
+            repConnection.Open();
+            try
+            {
+                SqlCommand addRepsToTable = new SqlCommand("INSERT INTO dbo.MarketingSalesRepSyncLog (UpdateDate, RepId, RepFirstName, RepLastName, RepEmail, RepDirectLine, RepTitle, RepImageURL_small, RepImageURL_large, UpdatedInBronto, CountOfCustomers, CustomersUpdated) " +
+                        $"VALUES ('{updateDate}', '{repId}', '{repFirstName}', '{repLastName}', '{repEmail}', '{repDirectLine}', '{repTitle}', '{repImageURL_small}', '{repImageURL_large}', {updatedInBronto}, {CountOfCustomers}, {CustomersUpdated});", repConnection);
+                var insertCall = addRepsToTable.ExecuteNonQuery();
+                return insertCall;
+            }
+            catch(Exception ex)
+            {
+                return 0;
+            }
         }
     }
 }

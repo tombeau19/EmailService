@@ -13,10 +13,10 @@
         </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.SyncController.UpdateSalesRep(Newtonsoft.Json.Linq.JObject)">
             <summary>
-            When Changes are made to Sales Rep(ie. name change, directline change, etc.). This method updates all the Rep's customers in Bronto
+            When Changes are made to Sales Rep, this saves the rep to the BRONTO.MarketingSalesRepSyncLog to be udpated by the Sync project
             </summary>
-            <remarks>returns a string with the number of successful updates and number of failed updates</remarks>
-            <param name="repWithCustomers">A Json object with the new sales rep info and a string array of all customers beloning to said rep. Field names to send: SalesRepFirstName, SalesRepLastName, SalesRepDirectLine, SalesRepImageUrlSmall, SalesRepImageUrlLarge, SalesRepEmail, SalesRepTitle</param>
+            <remarks>returns a 1 when success and 0 when failed</remarks>
+            <param name="repData"></param>
         </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.OrderConfirmation(BrontoLibrary.Models.Order)">
             <summary>
@@ -56,6 +56,13 @@
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.AccountElevation(BrontoLibrary.Models.Customer)">
             <summary>
             Sends an Account Elevation Email.
+            </summary>
+            <remarks>returns a string with the details of the Email Send attempt</remarks>
+            <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
+        </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.WelcomeEmail(BrontoLibrary.Models.Customer)">
+            <summary>
+            Sends a Pro Welcome Email.
             </summary>
             <remarks>returns a string with the details of the Email Send attempt</remarks>
             <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>

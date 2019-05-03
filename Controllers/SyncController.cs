@@ -24,14 +24,14 @@ namespace BrontoTransactionalEndpoint.Controllers
 
         // POST api/UpdateSalesRep
         /// <summary>
-        /// When Changes are made to Sales Rep(ie. name change, directline change, etc.). This method updates all the Rep's customers in Bronto
+        /// When Changes are made to Sales Rep, this saves the rep to the BRONTO.MarketingSalesRepSyncLog to be udpated by the Sync project
         /// </summary>
-        /// <remarks>returns a string with the number of successful updates and number of failed updates</remarks>
-        /// <param name="repWithCustomers">A Json object with the new sales rep info and a string array of all customers beloning to said rep. Field names to send: SalesRepFirstName, SalesRepLastName, SalesRepDirectLine, SalesRepImageUrlSmall, SalesRepImageUrlLarge, SalesRepEmail, SalesRepTitle</param>
+        /// <remarks>returns a 1 when success and 0 when failed</remarks>
+        /// <param name="repData"></param>
         [HttpPost("UpdateSalesRep")]
-        public string UpdateSalesRep(JObject repWithCustomers)
+        public int UpdateSalesRep(JObject repData)
         {
-            return Sync.UpdateSalesRep(repWithCustomers);
+            return Sync.UpdateSalesRep(repData);
         }
     }
 }

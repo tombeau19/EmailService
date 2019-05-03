@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BrontoTransactionalEndpoint.Models;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System;
 using Newtonsoft.Json.Linq;
 using BrontoLibrary.Models;
 
@@ -74,6 +76,17 @@ namespace BrontoTransactionalEndpoint.Controllers
         public string AccountElevation(Customer customer)
         {
             return Transact.AccountElevation(customer);
+        }
+
+        /// <summary>
+        /// Sends a Pro Welcome Email.
+        /// </summary>
+        /// <remarks>returns a string with the details of the Email Send attempt</remarks>
+        /// <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
+        [HttpPost("WelcomeEmail")]
+        public string WelcomeEmail(Customer customer)
+        {
+            return Transact.WelcomeEmail(customer);
         }
 
     }

@@ -18,15 +18,12 @@ namespace BrontoTransactionalEndpoint.Models
         internal static string OrderConfirmation(Order order)
         {
             BrontoConnector.DeliveryType deliveryType = BrontoConnector.DeliveryType.transactional;
-
+            
             if (order.SupplyNow == true)
             {
                 //SUPPLYnow Order Confirmation
                 var brontoResult = BrontoConnector.SendOrderConfirmationEmail("0bdb03eb0000000000000000000000106807", deliveryType, order).Result;
                 var result = EmailResult(brontoResult, order);
-                if (result.Contains("Failed"))
-                {
-                }
                 return result;
             }
             else if (order.Department == "29")
@@ -129,6 +126,14 @@ namespace BrontoTransactionalEndpoint.Models
             }
         }
 
+        internal static string WelcomeEmail(Customer customer)
+        {
+            //Rep Account Elevation
+            var brontoResult = BrontoConnector.SendAccountEmail(customer, "59df810343334dde290123cc9a477f0b").Result;
+            var result = EmailResult(brontoResult, customer);
+            return result;
+        }
+
         internal static string AccountElevation(Customer customer)
         {
             if (customer.IsNew == true)
@@ -137,13 +142,15 @@ namespace BrontoTransactionalEndpoint.Models
                 var brontoResult = BrontoConnector.SendAccountEmail(customer, "0bdb03eb0000000000000000000000106e3c").Result;
                 var result = EmailResult(brontoResult, customer);
                 return result;
-            } else if (customer.IsPro == true)
+            }
+            else if (customer.IsPro == true)
             {
                 //Account Elevation for Already Existing PRO
                 var brontoResult = BrontoConnector.SendAccountEmail(customer, "f78a836d0e658f688778c0dfd08a7f19").Result;
                 var result = EmailResult(brontoResult, customer);
                 return result;
-            } else
+            }
+            else
             {
                 //Account Eleavation for Already Existing D2C
                 var brontoResult = BrontoConnector.SendAccountEmail(customer, "b904aa97f0a394372c697288bd30cef4").Result;
