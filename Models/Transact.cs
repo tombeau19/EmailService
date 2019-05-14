@@ -33,38 +33,44 @@ namespace BrontoTransactionalEndpoint.Models
                 var result = EmailResult(brontoResult, order);
                 return result;
             }
-            else if (order.Department == "27")
+            else
             {
                 //SUPPLY.com Order Confirmation - D2C
                 var brontoResult = BrontoConnector.SendOrderConfirmationEmail("9892cace237d4f0dc466deb63c84bce1", deliveryType, order).Result;
                 var result = EmailResult(brontoResult, order);
                 return result;
             }
-            else
-            {
-                return $"Invalid request. Department likely not set. No email sent to {order.Email}";
-            }
         }
 
         internal static string EstimateEmail(Estimate estimate)
         {
-            if (estimate.Department == "29")
+            if (estimate.Department == "29" && estimate.Subject.Contains("SUPPLY.com"))
             {
                 //Estimate - PRO
                 var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "0bdb03eb000000000000000000000010761b").Result;
                 var result = EmailResult(brontoResult, estimate);
                 return result;
             }
-            else if (estimate.Department == "27")
+            else if (estimate.Department == "27" && estimate.Subject.Contains("SUPPLY.com"))
             {
                 //Estimate - D2C
                 var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "02e304b62399fb5ecd7a6a4325bfe4af").Result;
                 var result = EmailResult(brontoResult, estimate);
                 return result;
             }
+            else if(estimate.Department == "29")
+            {
+                //Estimate - PRO
+                var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "ad0ac8fec92a533d3eb3bdc479635119").Result;
+                var result = EmailResult(brontoResult, estimate);
+                return result;
+            }
             else
             {
-                return $"Invalid request. Department likely not set. No email sent to {estimate.Email}";
+                //Estimate - D2C
+                var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "5f6290832c2b68c3e59259c9aeddc7c3").Result;
+                var result = EmailResult(brontoResult, estimate);
+                return result;
             }
         }
 
@@ -77,16 +83,12 @@ namespace BrontoTransactionalEndpoint.Models
                 var result = EmailResult(brontoResult, order);
                 return result;
             }
-            else if (order.Department == "27")
+            else 
             {
                 //SUPPLY.com Shipping Confirmation - PRO
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "ed24176d6796a12b4b23514c932ec598").Result;
                 var result = EmailResult(brontoResult, order);
                 return result;
-            }
-            else
-            {
-                return $"Invalid request. Department likely not set. No email sent to {order.Email}";
             }
         }
 
