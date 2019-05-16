@@ -60,14 +60,14 @@ namespace BrontoTransactionalEndpoint.Models
             }
             else if(estimate.Department == "29")
             {
-                //Estimate - PRO
+                //Estimate - PRO follow ups
                 var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "ad0ac8fec92a533d3eb3bdc479635119").Result;
                 var result = EmailResult(brontoResult, estimate);
                 return result;
             }
             else
             {
-                //Estimate - D2C
+                //Estimate - D2C follow ups
                 var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "5f6290832c2b68c3e59259c9aeddc7c3").Result;
                 var result = EmailResult(brontoResult, estimate);
                 return result;
