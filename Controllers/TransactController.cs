@@ -3,8 +3,12 @@ using BrontoTransactionalEndpoint.Models;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System;
+using System.Threading.Tasks;
+using BrontoLibrary;
 using Newtonsoft.Json.Linq;
 using BrontoLibrary.Models;
+using BrontoReference;
+using Microsoft.Extensions.Logging;
 
 namespace BrontoTransactionalEndpoint.Controllers
 {
@@ -12,6 +16,12 @@ namespace BrontoTransactionalEndpoint.Controllers
     [ApiController]
     public class TransactController : ControllerBase
     {
+        private readonly ILogger<TransactController> _logger;
+        public TransactController(ILogger<TransactController> logger)
+        {
+            _logger = logger;
+        }
+
         /// <summary>
         /// Sends an Order Confirmation Email. The template used is based on the order being SUPPLYnow(bool), Pro(Department == "29"), or D2C(Department == "27").
         /// </summary>
