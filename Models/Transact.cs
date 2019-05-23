@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using BrontoLibrary.Models;
 using BrontoLibrary;
 using BrontoReference;
+using Serilog;
 using BrontoTransactionalEndpoint.Controllers;
 
 namespace BrontoTransactionalEndpoint.Models
@@ -18,7 +19,7 @@ namespace BrontoTransactionalEndpoint.Models
         internal static string OrderConfirmation(Order order)
         {
             BrontoConnector.DeliveryType deliveryType = BrontoConnector.DeliveryType.transactional;
-            
+
             if (order.SupplyNow == true)
             {
                 //SUPPLYnow Order Confirmation
@@ -44,12 +45,45 @@ namespace BrontoTransactionalEndpoint.Models
 
         internal static string EstimateEmail(Estimate estimate)
         {
-            if (estimate.Department == "29" && estimate.Subject.Contains("SUPPLY.com"))
+            //Bronto Templates
+            string ProEstimateMessageID = "0bdb03eb000000000000000000000010761b";
+            string OneWkToCloseMessageID = "c7fe3060fccfab3446bc9c4bc0ad95ce";
+            string DayOfCloseMessageID = "6daefecf836cd65fdf3640d1598fee54";
+            string OneWkPastCloseMessageID = "187b70784f747adf1ea5763d9e5b8440";
+            string TwoWkToExpireMessageID = "d686d25c8ca178ecdaa95bcfb823ea4d";
+            string OneWkToExpireMessageID = "832c37f898bc5f706b207f6f0cbb054a";
+            string DayAfterExpireMessageID = "5aba812ac3c3433f65c0f13b306e36ec";
+
+            //Email Subject Lines - Set in NETSUITE BrontoEstFollowUpTriggerWFA.js
+            string ProEstimateSubject = "SUPPLY.com Estimate";
+            string OneWkToCloseSubject = "Status of";
+            string DayOfCloseSubject = "Checking in on your estimate";
+            string OneWkPastCloseSubject = "Estimate status for";
+            string TwoWkToExpireSubject = "is expiring soon!";
+            string OneWkToExpireSubject = "You have an expiring estimate";
+            string DayAfterExpireSubject = "Requesting Feedback";
+
+            if (estimate.Department == "29")
             {
-                //Estimate - PRO
-                var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "0bdb03eb000000000000000000000010761b").Result;
-                var result = EmailResult(brontoResult, estimate);
-                return result;
+                var messageType = estimate.Subject.Contains(ProEstimateSubject) ? ProEstimateMessageID :
+                    estimate.Subject.Contains(OneWkToCloseSubject) ? OneWkToCloseMessageID :
+                        estimate.Subject.Contains(DayOfCloseSubject) ? DayOfCloseMessageID :
+                            estimate.Subject.Contains(OneWkPastCloseSubject) ? OneWkPastCloseMessageID :
+                                estimate.Subject.Contains(TwoWkToExpireSubject) ? TwoWkToExpireMessageID :
+                                    estimate.Subject.Contains(OneWkToExpireSubject) ? OneWkToExpireMessageID :
+                                        estimate.Subject.Contains(DayAfterExpireSubject) ? DayAfterExpireMessageID : "";
+
+                if (messageType == "")
+                {
+                    //TODO throw error
+                    return $"Estimate Email Failed to send {estimate.Email}";
+                }
+                else
+                {
+                    var brontoResult = BrontoConnector.SendEstimateEmail(estimate, messageType).Result;
+                    var result = EmailResult(brontoResult, estimate);
+                    return result;
+                }
             }
             else if (estimate.Department == "27" && estimate.Subject.Contains("SUPPLY.com"))
             {
@@ -58,18 +92,9 @@ namespace BrontoTransactionalEndpoint.Models
                 var result = EmailResult(brontoResult, estimate);
                 return result;
             }
-            else if(estimate.Department == "29")
-            {
-                //Estimate - PRO follow ups
-                var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "ad0ac8fec92a533d3eb3bdc479635119").Result;
-                var result = EmailResult(brontoResult, estimate);
-                return result;
-            }
             else
             {
-                //Estimate - D2C follow ups
-                var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "5f6290832c2b68c3e59259c9aeddc7c3").Result;
-                var result = EmailResult(brontoResult, estimate);
+                var result = "D2C follow ups are turned off";
                 return result;
             }
         }
@@ -83,7 +108,7 @@ namespace BrontoTransactionalEndpoint.Models
                 var result = EmailResult(brontoResult, order);
                 return result;
             }
-            else 
+            else
             {
                 //SUPPLY.com Shipping Confirmation - PRO
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "ed24176d6796a12b4b23514c932ec598").Result;

@@ -23,6 +23,21 @@ namespace BrontoTransactionalEndpoint
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            var logFilePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "bronto.log");
+            var sqliteFilePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "logs.sqlite");
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+                .MinimumLevel.Override("System", LogEventLevel.Warning)
+                .WriteTo.Async(al =>
+                {
+                    al.File(logFilePath, rollingInterval: RollingInterval.Day);
+                    al.SQLite(sqliteFilePath);
+                    al.Console();
+                })
+                .Enrich.FromLogContext()
+                .CreateLogger();
         }
 
         public IConfiguration Configuration { get; }
@@ -40,7 +55,7 @@ namespace BrontoTransactionalEndpoint
                         Version = "v1",
                         Title = "BrontoTransactAPI",
                         Description = "Sends transactional emails through the Bronto Platform. Also, updates contacts in Bronto",
-                        Contact = new Contact() { Name = "SuiteSquad", Email = "t.beauregard@hmwallace.com"}
+                        Contact = new Contact() { Name = "SuiteSquad", Email = "t.beauregard@hmwallace.com" }
                     });
 
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "BrontoTransactionalEndpoint.xml");
@@ -63,7 +78,7 @@ namespace BrontoTransactionalEndpoint
             {
                 app.UseHsts();
             }
-            
+
             app.UseHttpsRedirection();
             app.UseMvc();
 
