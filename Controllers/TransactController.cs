@@ -77,15 +77,26 @@ namespace BrontoTransactionalEndpoint.Controllers
             return Transact.PasswordUpdate(customer);
         }
 
+        private readonly string NewCustomerMessageID = "0bdb03eb0000000000000000000000106e3c";
+        private readonly string ProCustomerMessageID = "f78a836d0e658f688778c0dfd08a7f19";
+        private readonly string D2CCustomerMessageID = "b904aa97f0a394372c697288bd30cef4";
+        private readonly string WelcomeMessageID = "59df810343334dde290123cc9a477f0b";
+        private readonly string ProPasswordResetMessageID = "0bdb03eb0000000000000000000000107043";
+
         /// <summary>
         /// Sends an Account Elevation Email.
         /// </summary>
         /// <remarks>returns a string with the details of the Email Send attempt</remarks>
         /// <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
         [HttpPost("AccountElevation")]
-        public string AccountElevation(Customer customer)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public Task<IActionResult> AccountElevation(Customer customer)
         {
-            return Transact.AccountElevation(customer);
+            var messageType = customer.IsNew ? NewCustomerMessageID :
+                customer.IsPro ? ProCustomerMessageID : D2CCustomerMessageID;
+
+            return SendAccountEmail(customer, messageType);
         }
 
         /// <summary>
@@ -94,9 +105,52 @@ namespace BrontoTransactionalEndpoint.Controllers
         /// <remarks>returns a string with the details of the Email Send attempt</remarks>
         /// <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
         [HttpPost("WelcomeEmail")]
-        public string WelcomeEmail(Customer customer)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public Task<IActionResult> WelcomeEmail(Customer customer)
         {
-            return Transact.WelcomeEmail(customer);
+            var messageType = WelcomeMessageID;
+
+            return SendAccountEmail(customer, messageType);
+        }
+
+        private async Task<IActionResult> SendAccountEmail(Customer customer, string messageType)
+        {
+            JObject brontoResult = null;
+            try
+            {
+                brontoResult = await BrontoConnector.SendAccountEmail(customer, messageType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send account email");
+                var details = new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Title = "Email failed to send"
+                };
+                return StatusCode(500, details);
+            }
+
+            if (WasSuccessful(brontoResult))
+            {
+                return Ok();
+            }
+            else
+            {
+                _logger.LogError("Email send failed for {email}. Error code: {brontoResult}", customer.Email, brontoResult);
+                var details = new ProblemDetails
+                {
+                    Detail = brontoResult.ToString(),
+                    Title = "Email failed to send"
+                };
+                return StatusCode(500, details);
+            }
+        }
+
+        private static bool WasSuccessful(JObject result)
+        {
+            return !(bool)result["isError"];
         }
 
     }

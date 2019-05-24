@@ -161,31 +161,6 @@ namespace BrontoTransactionalEndpoint.Models
             return result;
         }
 
-        internal static string AccountElevation(Customer customer)
-        {
-            if (customer.IsNew == true)
-            {
-                //Account Elevation for Net New PRO Accounts
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "0bdb03eb0000000000000000000000106e3c").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
-            }
-            else if (customer.IsPro == true)
-            {
-                //Account Elevation for Already Existing PRO
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "f78a836d0e658f688778c0dfd08a7f19").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
-            }
-            else
-            {
-                //Account Eleavation for Already Existing D2C
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "b904aa97f0a394372c697288bd30cef4").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
-            }
-        }
-
         #region Helpers
 
         private static string EmailResult(writeResult brontoResult, Order order)
