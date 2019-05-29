@@ -61,9 +61,13 @@ namespace BrontoTransactionalEndpoint.Controllers
         /// <remarks>returns a string with the details of the Email Send attempt</remarks>
         /// <param name="customer">Customer Email, IsPro, and Token are mandatory</param>
         [HttpPost("PasswordReset")]
-        public string PasswordReset(Customer customer)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public Task<IActionResult> PasswordReset(Customer customer)
         {
-            return Transact.PasswordReset(customer);
+            var messageType = customer.IsPro ? ProPasswordResetMessageID : D2CPasswordResetMessageID;
+
+            return SendAccountEmail(customer, messageType);
         }
         
         /// <summary>
@@ -72,9 +76,13 @@ namespace BrontoTransactionalEndpoint.Controllers
         /// <remarks>returns a string with the details of the Email Send attempt</remarks>
         /// <param name="customer">**This email does not have dynamic fields in the template, Customer Email and IsPro are only mandatory fields**</param>
         [HttpPost("PasswordUpdate")]
-        public string PasswordUpdate(Customer customer)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public Task<IActionResult> PasswordUpdate(Customer customer)
         {
-            return Transact.PasswordUpdate(customer);
+            var messageType = customer.IsPro ? ProPasswordUpdateMessageID : D2CPasswordUpdateMessageID;
+
+            return SendAccountEmail(customer, messageType);
         }
 
         private readonly string NewCustomerMessageID = "0bdb03eb0000000000000000000000106e3c";
@@ -82,6 +90,10 @@ namespace BrontoTransactionalEndpoint.Controllers
         private readonly string D2CCustomerMessageID = "b904aa97f0a394372c697288bd30cef4";
         private readonly string WelcomeMessageID = "59df810343334dde290123cc9a477f0b";
         private readonly string ProPasswordResetMessageID = "0bdb03eb0000000000000000000000107043";
+        private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";
+        private readonly string ProPasswordUpdateMessageID = "0bdb03eb0000000000000000000000107052";
+        private readonly string D2CPasswordUpdateMessageID = "4fffc12ab5e0b56a7e57a0762570bda0";
+
 
         /// <summary>
         /// Sends an Account Elevation Email.
