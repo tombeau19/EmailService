@@ -22,6 +22,17 @@ namespace BrontoTransactionalEndpoint.Controllers
             _logger = logger;
         }
 
+        #region Message IDs
+        private readonly string NewCustomerMessageID = "0bdb03eb0000000000000000000000106e3c";
+        private readonly string ProCustomerMessageID = "f78a836d0e658f688778c0dfd08a7f19";
+        private readonly string D2CCustomerMessageID = "b904aa97f0a394372c697288bd30cef4";
+        private readonly string ProWelcomeMessageID = "59df810343334dde290123cc9a477f0b";
+        private readonly string ProPasswordResetMessageID = "0bdb03eb0000000000000000000000107043";
+        private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";
+        private readonly string ProPasswordUpdateMessageID = "0bdb03eb0000000000000000000000107052";
+        private readonly string D2CPasswordUpdateMessageID = "4fffc12ab5e0b56a7e57a0762570bda0";
+        #endregion
+
         /// <summary>
         /// Sends an Order Confirmation Email. The template used is based on the order being SUPPLYnow(bool), Pro(Department == "29"), or D2C(Department == "27").
         /// </summary>
@@ -85,16 +96,6 @@ namespace BrontoTransactionalEndpoint.Controllers
             return SendAccountEmail(customer, messageType);
         }
 
-        private readonly string NewCustomerMessageID = "0bdb03eb0000000000000000000000106e3c";
-        private readonly string ProCustomerMessageID = "f78a836d0e658f688778c0dfd08a7f19";
-        private readonly string D2CCustomerMessageID = "b904aa97f0a394372c697288bd30cef4";
-        private readonly string WelcomeMessageID = "59df810343334dde290123cc9a477f0b";
-        private readonly string ProPasswordResetMessageID = "0bdb03eb0000000000000000000000107043";
-        private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";
-        private readonly string ProPasswordUpdateMessageID = "0bdb03eb0000000000000000000000107052";
-        private readonly string D2CPasswordUpdateMessageID = "4fffc12ab5e0b56a7e57a0762570bda0";
-
-
         /// <summary>
         /// Sends an Account Elevation Email.
         /// </summary>
@@ -121,7 +122,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public Task<IActionResult> WelcomeEmail(Customer customer)
         {
-            var messageType = WelcomeMessageID;
+            var messageType = ProWelcomeMessageID;
 
             return SendAccountEmail(customer, messageType);
         }

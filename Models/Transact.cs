@@ -117,50 +117,6 @@ namespace BrontoTransactionalEndpoint.Models
             }
         }
 
-        internal static string PasswordReset(Customer customer)
-        {
-            if (customer.IsPro == true)
-            {
-                //Password Reset - PRO
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "0bdb03eb0000000000000000000000107043").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
-            }
-            else
-            {
-                //Password Reset - D2C
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "cef7902b45ddfecfc6ed14d9f4f714df").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
-            }
-        }
-
-        internal static string PasswordUpdate(Customer customer)
-        {
-            if (customer.IsPro == true)
-            {
-                //Password Update - PRO
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "0bdb03eb0000000000000000000000107052").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
-            }
-            else
-            {
-                //Password Update - D2C
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "4fffc12ab5e0b56a7e57a0762570bda0").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
-            }
-        }
-
-        internal static string WelcomeEmail(Customer customer)
-        {
-            //Rep Account Elevation
-            var brontoResult = BrontoConnector.SendAccountEmail(customer, "59df810343334dde290123cc9a477f0b").Result;
-            var result = EmailResult(brontoResult, customer);
-            return result;
-        }
-
         #region Helpers
 
         private static string EmailResult(writeResult brontoResult, Order order)
