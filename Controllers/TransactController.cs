@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 using BrontoLibrary.Models;
 using BrontoReference;
 using Microsoft.Extensions.Logging;
-using SlackReporting;
+using BrontoTransactionalEndpoint.Controllers;
 
 namespace BrontoTransactionalEndpoint.Controllers
 {
@@ -143,6 +143,8 @@ namespace BrontoTransactionalEndpoint.Controllers
                     Detail = ex.Message,
                     Title = "Email failed to send"
                 };
+
+                await TeamsHelper.SendError($"Email failed to send to {customer.Email}", $"{ex.Message}");
                 return StatusCode(500, details);
             }
 
@@ -158,6 +160,8 @@ namespace BrontoTransactionalEndpoint.Controllers
                     Detail = brontoResult.ToString(),
                     Title = "Email failed to send"
                 };
+
+                await TeamsHelper.SendError($"Email failed to send", $"Failed to send to {customer.Email}. {brontoResult.ToString()}");
                 return StatusCode(500, details);
             }
         }
