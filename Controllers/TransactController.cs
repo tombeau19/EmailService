@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using BrontoLibrary.Models;
 using BrontoReference;
 using Microsoft.Extensions.Logging;
+using SlackReporting;
 
 namespace BrontoTransactionalEndpoint.Controllers
 {
