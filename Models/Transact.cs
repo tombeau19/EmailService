@@ -24,21 +24,21 @@ namespace BrontoTransactionalEndpoint.Models
             {
                 //SUPPLYnow Order Confirmation
                 var brontoResult = BrontoConnector.SendOrderConfirmationEmail("0bdb03eb0000000000000000000000106807", deliveryType, order).Result;
-                var result = EmailResult(brontoResult, order);
+                var result = OrderEmailResult(brontoResult, order);
                 return result;
             }
             else if (order.Department == "29")
             {
                 //SUPPLY.com Order Confirmation - PRO
                 var brontoResult = BrontoConnector.SendOrderConfirmationEmail("0bdb03eb00000000000000000000001068b3", deliveryType, order).Result;
-                var result = EmailResult(brontoResult, order);
+                var result = OrderEmailResult(brontoResult, order);
                 return result;
             }
             else
             {
                 //SUPPLY.com Order Confirmation - D2C
                 var brontoResult = BrontoConnector.SendOrderConfirmationEmail("9892cace237d4f0dc466deb63c84bce1", deliveryType, order).Result;
-                var result = EmailResult(brontoResult, order);
+                var result = OrderEmailResult(brontoResult, order);
                 return result;
             }
         }
@@ -81,7 +81,7 @@ namespace BrontoTransactionalEndpoint.Models
                 else
                 {
                     var brontoResult = BrontoConnector.SendEstimateEmail(estimate, messageType).Result;
-                    var result = EmailResult(brontoResult, estimate);
+                    var result = EstimateEmailResult(brontoResult, estimate);
                     return result;
                 }
             }
@@ -89,7 +89,7 @@ namespace BrontoTransactionalEndpoint.Models
             {
                 //Estimate - D2C
                 var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "02e304b62399fb5ecd7a6a4325bfe4af").Result;
-                var result = EmailResult(brontoResult, estimate);
+                var result = EstimateEmailResult(brontoResult, estimate);
                 return result;
             }
             else
@@ -105,21 +105,21 @@ namespace BrontoTransactionalEndpoint.Models
             {
                 //SUPPLY.com Shipping Confirmation - PRO
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "f3703ac72ea42b799b45cec77e8007c2").Result;
-                var result = EmailResult(brontoResult, order);
+                var result = ShippingEmailResult(brontoResult, order);
                 return result;
             }
             else
             {
                 //SUPPLY.com Shipping Confirmation - PRO
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "ed24176d6796a12b4b23514c932ec598").Result;
-                var result = EmailResult(brontoResult, order);
+                var result = ShippingEmailResult(brontoResult, order);
                 return result;
             }
         }
 
         #region Helpers
 
-        private static string EmailResult(writeResult brontoResult, Order order)
+        private static string OrderEmailResult(writeResult brontoResult, Order order)
         {
             if (brontoResult.results[0].errorCode != 0)
             {
@@ -132,7 +132,7 @@ namespace BrontoTransactionalEndpoint.Models
                 return success;
             }
         }
-        private static string EmailResult(JObject brontoResult, Estimate estimate)
+        private static string EstimateEmailResult(JObject brontoResult, Estimate estimate)
         {
             if ((int)brontoResult["errorCode"] != 0)
             {
@@ -145,7 +145,7 @@ namespace BrontoTransactionalEndpoint.Models
                 return success;
             }
         }
-        private static string EmailResult(JObject brontoResult, Order order)
+        private static string ShippingEmailResult(JObject brontoResult, Order order)
         {
             if ((int)brontoResult["errorCode"] != 0)
             {
