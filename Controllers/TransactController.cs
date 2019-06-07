@@ -89,6 +89,17 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         /// <summary>
+        /// Sends a Specific Transactional Email based on current Promotion.
+        /// </summary>
+        /// <remarks>returns a string with the details of the Email Send attempt</remarks>
+        /// <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
+        [HttpPost("Promo")]
+        public string Promo(Customer customer)
+        {
+            return Transact.Promo(customer);
+        }
+
+        /// <summary>
         /// Sends a Pro Welcome Email.
         /// </summary>
         /// <remarks>returns a string with the details of the Email Send attempt</remarks>
