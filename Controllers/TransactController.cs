@@ -110,6 +110,17 @@ namespace BrontoTransactionalEndpoint.Controllers
             return Transact.WelcomeEmail(customer);
         }
 
+        /// <summary>
+        /// Sends a keyword to trigger a Bronto workflow via API.
+        /// </summary>
+        /// <remarks>returns a string indicating whether or not the workflow was triggered</remarks>
+        /// <param name="customer">Customer Email with the customer Keyword are required to the trigger the workflow</param>
+        [HttpPost("TriggerBrontoWorkflow")]
+        public string TriggerBrontoWorkflow(Customer customer)
+        {
+            return Transact.TriggerBrontoWorkflow(customer);
+        }
+
     }
 
 }

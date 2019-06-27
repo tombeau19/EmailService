@@ -192,7 +192,7 @@ namespace BrontoTransactionalEndpoint.Models
             {
                 //PAM - Albert - Net New PRO
                 var brontoResult = BrontoConnector.SendAccountEmail(customer, "72911a76cfa01d1225044d0d400053da").Result;
-                var result = EmailResult(brontoResult, customer);
+                var result = EmailResult(brontoResult, customer); 
                 return result;
             }
             else if (customer.IsPro == true)
@@ -209,6 +209,12 @@ namespace BrontoTransactionalEndpoint.Models
                 var result = EmailResult(brontoResult, customer);
                 return result;
             }
+        }
+
+        internal static string TriggerBrontoWorkflow(Customer customer)
+        {
+            var brontoResult = BrontoConnector.TriggerBrontoWorkflow(customer).Result;
+            return brontoResult.ToString();
         }
 
         #region Helpers
