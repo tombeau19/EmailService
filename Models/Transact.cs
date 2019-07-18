@@ -15,34 +15,6 @@ namespace BrontoTransactionalEndpoint.Models
     //Templat IDs have their corresponding names in the Bronto Platform commented above them
     public class Transact
     {
-
-        internal static string OrderConfirmation(Order order)
-        {
-            BrontoConnector.DeliveryType deliveryType = BrontoConnector.DeliveryType.transactional;
-
-            if (order.SupplyNow == true)
-            {
-                //SUPPLYnow Order Confirmation
-                var brontoResult = BrontoConnector.SendOrderConfirmationEmail("0bdb03eb0000000000000000000000106807", deliveryType, order).Result;
-                var result = EmailResult(brontoResult, order);
-                return result;
-            }
-            else if (order.Department == "29")
-            {
-                //SUPPLY.com Order Confirmation - PRO
-                var brontoResult = BrontoConnector.SendOrderConfirmationEmail("0bdb03eb00000000000000000000001068b3", deliveryType, order).Result;
-                var result = EmailResult(brontoResult, order);
-                return result;
-            }
-            else
-            {
-                //SUPPLY.com Order Confirmation - D2C
-                var brontoResult = BrontoConnector.SendOrderConfirmationEmail("9892cace237d4f0dc466deb63c84bce1", deliveryType, order).Result;
-                var result = EmailResult(brontoResult, order);
-                return result;
-            }
-        }
-
         internal static string EstimateEmail(Estimate estimate)
         {
             //Bronto Templates
@@ -119,19 +91,6 @@ namespace BrontoTransactionalEndpoint.Models
 
         #region Helpers
 
-        private static string EmailResult(writeResult brontoResult, Order order)
-        {
-            if (brontoResult.results[0].errorCode != 0)
-            {
-                string error = $"Email Failed for {order.Email}. Error Code: {brontoResult.results[0].errorCode}. Error String: {brontoResult.results[0].errorString}";
-                return error;
-            }
-            else
-            {
-                string success = $"Success, Email Sent to {order.Email}";
-                return success;
-            }
-        }
         private static string EmailResult(JObject brontoResult, Estimate estimate)
         {
             if ((int)brontoResult["errorCode"] != 0)
