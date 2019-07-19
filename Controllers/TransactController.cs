@@ -159,6 +159,17 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         /// <summary>
+        /// Sends a Specific Transactional Email based on current Promotion.
+        /// </summary>
+        /// <remarks>returns a string with the details of the Email Send attempt</remarks>
+        /// <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
+        [HttpPost("Promo")]
+        public string Promo(Customer customer)
+        {
+            return Transact.Promo(customer);
+        }
+
+        /// <summary>
         /// Sends a Pro Welcome Email.
         /// </summary>
         /// <remarks>returns a string with the details of the Email Send attempt</remarks>
@@ -219,6 +230,17 @@ namespace BrontoTransactionalEndpoint.Controllers
         private static bool WasSuccessful(writeResult result)
         {
             return !(bool)result.results[0].isError;
+        }
+
+        /// <summary>
+        /// Sends a keyword to trigger a Bronto workflow via API.
+        /// </summary>
+        /// <remarks>returns a string indicating whether or not the workflow was triggered</remarks>
+        /// <param name="customer">Customer Email with the customer Keyword are required to the trigger the workflow</param>
+        [HttpPost("TriggerBrontoWorkflow")]
+        public string TriggerBrontoWorkflow(Customer customer)
+        {
+            return Transact.TriggerBrontoWorkflow(customer);
         }
 
     }

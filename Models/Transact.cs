@@ -89,6 +89,37 @@ namespace BrontoTransactionalEndpoint.Models
             }
         }
 
+        internal static string Promo(Customer customer)
+        {
+            if (customer.IsNew == true)
+            {
+                //PAM - Albert - Net New PRO
+                var brontoResult = BrontoConnector.SendAccountEmail(customer, "72911a76cfa01d1225044d0d400053da").Result;
+                var result = EmailResult(brontoResult, customer); 
+                return result;
+            }
+            else if (customer.IsPro == true)
+            {
+                //PAM - Albert - Existing PRO
+                var brontoResult = BrontoConnector.SendAccountEmail(customer, "028db216dfc93bd8901a626081a8f6f5").Result;
+                var result = EmailResult(brontoResult, customer);
+                return result;
+            }
+            else
+            {
+                //PAM - Albert - Existing D2C
+                var brontoResult = BrontoConnector.SendAccountEmail(customer, "2e6670754405f6456860e1a45a0fa79f").Result;
+                var result = EmailResult(brontoResult, customer);
+                return result;
+            }
+        }
+
+        internal static string TriggerBrontoWorkflow(Customer customer)
+        {
+            var brontoResult = BrontoConnector.TriggerBrontoWorkflow(customer).Result;
+            return brontoResult.ToString();
+        }
+
         #region Helpers
 
         private static string EmailResult(JObject brontoResult, Estimate estimate)
