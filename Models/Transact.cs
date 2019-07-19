@@ -53,7 +53,7 @@ namespace BrontoTransactionalEndpoint.Models
                 else
                 {
                     var brontoResult = BrontoConnector.SendEstimateEmail(estimate, messageType).Result;
-                    var result = EmailResult(brontoResult, estimate);
+                    var result = EstimateEmailResult(brontoResult, estimate);
                     return result;
                 }
             }
@@ -61,7 +61,7 @@ namespace BrontoTransactionalEndpoint.Models
             {
                 //Estimate - D2C
                 var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "02e304b62399fb5ecd7a6a4325bfe4af").Result;
-                var result = EmailResult(brontoResult, estimate);
+                var result = EstimateEmailResult(brontoResult, estimate);
                 return result;
             }
             else
@@ -77,14 +77,14 @@ namespace BrontoTransactionalEndpoint.Models
             {
                 //SUPPLY.com Shipping Confirmation - PRO
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "f3703ac72ea42b799b45cec77e8007c2").Result;
-                var result = EmailResult(brontoResult, order);
+                var result = ShippingEmailResult(brontoResult, order);
                 return result;
             }
             else
             {
                 //SUPPLY.com Shipping Confirmation - PRO
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "ed24176d6796a12b4b23514c932ec598").Result;
-                var result = EmailResult(brontoResult, order);
+                var result = ShippingEmailResult(brontoResult, order);
                 return result;
             }
         }
@@ -104,7 +104,7 @@ namespace BrontoTransactionalEndpoint.Models
                 return success;
             }
         }
-        private static string EmailResult(JObject brontoResult, Order order)
+        private static string ShippingEmailResult(JObject brontoResult, Order order)
         {
             if ((int)brontoResult["errorCode"] != 0)
             {
