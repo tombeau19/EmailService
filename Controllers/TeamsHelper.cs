@@ -10,7 +10,7 @@ namespace BrontoTransactionalEndpoint.Controllers
     {
         public static async Task SendError(string title, string text)
         {
-            string webhookUrl = "https://outlook.office.com/webhook/2e3cbfd5-55cb-4a1b-a2fd-c683dbffd345@3c2f8435-994c-4552-8fe8-2aec2d0822e4/IncomingWebhook/1e1761ecf1c546d59bdc40ba7b8442b9/35aa24e2-d8c8-48b7-8dbe-c577c684ca90";
+            string webhookUrl = "https://outlook.office.com/webhook/2e3cbfd5-55cb-4a1b-a2fd-c683dbffd345@3c2f8435-994c-4552-8fe8-2aec2d0822e4/IncomingWebhook/d035124ea28c49dc852fabd7a85c05c4/35aa24e2-d8c8-48b7-8dbe-c577c684ca90";
 
             string cardJson = @"{
                 ""@context"":""https://schema.org/extensions"",
