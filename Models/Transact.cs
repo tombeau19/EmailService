@@ -117,6 +117,19 @@ namespace BrontoTransactionalEndpoint.Models
                 return success;
             }
         }
+        private static string EstimateEmailResult(JObject brontoResult, Estimate estimate)
+        {
+            if ((int)brontoResult["errorCode"] != 0)
+            {
+                string error = $"Email Failed for {estimate.Email}. Error Code: {(int)brontoResult["errorCode"]}. Error String: {(string)brontoResult["errorString"]}";
+                return error;
+            }
+            else
+            {
+                string success = $"Success, Email Sent to {estimate.Email}";
+                return success;
+            }
+        }
 
         #endregion
     }

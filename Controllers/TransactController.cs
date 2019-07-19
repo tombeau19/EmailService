@@ -64,6 +64,7 @@ namespace BrontoTransactionalEndpoint.Controllers
                     Detail = ex.Message,
                     Title = "Email failed to send"
                 };
+                await TeamsHelper.SendError($"Email failed to send to {order.Email}", $"{ex.Message}");
                 return StatusCode(500, details);
             }
 
@@ -81,6 +82,7 @@ namespace BrontoTransactionalEndpoint.Controllers
                     Detail = brontoResult.results[0].errorString,
                     Title = "Email failed to send"
                 };
+                await TeamsHelper.SendError($"Email failed to send to {order.Email}", $"{brontoResult.results[0].errorString}");
                 return StatusCode(500, details);
             }
 
