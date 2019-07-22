@@ -24,7 +24,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         #region Message IDs
-        private readonly string[] NewCustomerAlbertMessageID = { /*Albert Account Elevation for Net New PRO Accounts*/ "0bdb03eb0000000000000000000000106e3c", /*Albert Account Elevation - Net New PRO V1 Update 07.2019*/ "17fa2af8e0aa3aa097b0e1fc24741e01" };
+        private readonly string[] NewCustomerAlbertMessageID = { /*Albert Account Elevation for Net New PRO Accounts*/ "0bdb03eb0000000000000000000000106e3c"/*, Albert Account Elevation - Net New PRO V1 Update 07.2019 "17fa2af8e0aa3aa097b0e1fc24741e01"*/ };
         private readonly string[] ProCustomerAlbertMessageID = { /*Albert Account Elevation for Already Existing PRO*/ "f78a836d0e658f688778c0dfd08a7f19" };
         private readonly string[] D2CCustomerAlbertMessageID = { /*Albert Account Elevation for Already Existing D2C*/ "b904aa97f0a394372c697288bd30cef4" };
         private readonly string ProWelcomeMessageID = "59df810343334dde290123cc9a477f0b";

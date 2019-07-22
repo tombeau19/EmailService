@@ -122,16 +122,16 @@ namespace BrontoTransactionalEndpoint.Models
 
         #region Helpers
 
-        private static string EmailResult(JObject brontoResult, Estimate estimate)
+        private static string EmailResult(JObject brontoResult, Customer customer)
         {
             if ((int)brontoResult["errorCode"] != 0)
             {
-                string error = $"Email Failed for {estimate.Email}. Error Code: {(int)brontoResult["errorCode"]}. Error String: {(string)brontoResult["errorString"]}";
+                string error = $"Email Failed for {customer.Email}. Error Code: {(int)brontoResult["errorCode"]}. Error String: {(string)brontoResult["errorString"]}";
                 return error;
             }
             else
             {
-                string success = $"Success, Email Sent to {estimate.Email}";
+                string success = $"Success, Email Sent to {customer.Email}";
                 return success;
             }
         }
