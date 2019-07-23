@@ -24,7 +24,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         #region Message IDs
-        private readonly string[] NewCustomerAlbertMessageID = { /*Albert Account Elevation for Net New PRO Accounts*/ "0bdb03eb0000000000000000000000106e3c"/*, Albert Account Elevation - Net New PRO V1 Update 07.2019 "17fa2af8e0aa3aa097b0e1fc24741e01"*/ };
+        private readonly string[] NewCustomerAlbertMessageID = { /*Albert Account Elevation for Net New PRO Accounts*/ "0bdb03eb0000000000000000000000106e3c", /*Albert Net New PRO - Subject Line Name Test Email*/ "7fdb4a27155056afda4e539dd26aced1" };
         private readonly string[] ProCustomerAlbertMessageID = { /*Albert Account Elevation for Already Existing PRO*/ "f78a836d0e658f688778c0dfd08a7f19" };
         private readonly string[] D2CCustomerAlbertMessageID = { /*Albert Account Elevation for Already Existing D2C*/ "b904aa97f0a394372c697288bd30cef4" };
         private readonly string ProWelcomeMessageID = "59df810343334dde290123cc9a477f0b";
@@ -170,6 +170,17 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         /// <summary>
+        /// Sends a keyword to trigger a Bronto workflow via API.
+        /// </summary>
+        /// <remarks>returns a string indicating whether or not the workflow was triggered</remarks>
+        /// <param name="customer">Customer Email with the customer Keyword are required to trigger the workflow</param>
+        [HttpPost("TriggerBrontoWorkflow")]
+        public string TriggerBrontoWorkflow(Customer customer)
+        {
+            return Transact.TriggerBrontoWorkflow(customer);
+        }
+
+        /// <summary>
         /// Sends a Pro Welcome Email.
         /// </summary>
         /// <remarks>returns a string with the details of the Email Send attempt</remarks>
@@ -197,7 +208,7 @@ namespace BrontoTransactionalEndpoint.Controllers
                 var details = new ProblemDetails
                 {
                     Detail = ex.Message,
-                    Title = "Email failed to send"
+                    Title = "Account Email failed to send"
                 };
 
                 await TeamsHelper.SendError($"Account Email failed: {customer.Email}", $"{ex.Message}");
@@ -214,10 +225,10 @@ namespace BrontoTransactionalEndpoint.Controllers
                 var details = new ProblemDetails
                 {
                     Detail = brontoResult.ToString(),
-                    Title = "Email failed to send"
+                    Title = "Account Email failed to send"
                 };
 
-                await TeamsHelper.SendError($"Email failed to send", $"Failed to send to {customer.Email}. {brontoResult.ToString()}");
+                await TeamsHelper.SendError($"Account Email failed to send", $"Failed to send to {customer.Email}. {brontoResult.ToString()}");
                 return StatusCode(500, details);
             }
         }
@@ -230,17 +241,6 @@ namespace BrontoTransactionalEndpoint.Controllers
         private static bool WasSuccessful(writeResult result)
         {
             return !(bool)result.results[0].isError;
-        }
-
-        /// <summary>
-        /// Sends a keyword to trigger a Bronto workflow via API.
-        /// </summary>
-        /// <remarks>returns a string indicating whether or not the workflow was triggered</remarks>
-        /// <param name="customer">Customer Email with the customer Keyword are required to the trigger the workflow</param>
-        [HttpPost("TriggerBrontoWorkflow")]
-        public string TriggerBrontoWorkflow(Customer customer)
-        {
-            return Transact.TriggerBrontoWorkflow(customer);
         }
 
     }
