@@ -39,7 +39,7 @@ namespace BrontoTransactionalEndpoint.Models
                 var result = EstimateEmailResult(brontoResult, estimate);
                 return result;
             }
-            else if (estimate.Department == "27" && estimate.Subject.Contains("SUPPLY.com"))
+            else if (estimate.Department == "27" && estimate.EstimateType == 0)
             {
                 //Estimate - D2C
                 var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "02e304b62399fb5ecd7a6a4325bfe4af").Result;
