@@ -24,9 +24,24 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         #region Message IDs
-        private readonly string[] NewCustomerAlbertMessageID = { /*Albert Account Elevation for Net New PRO Accounts*/ "0bdb03eb0000000000000000000000106e3c", /*Albert Net New PRO - Subject Line Name Test Email*/ "7fdb4a27155056afda4e539dd26aced1" };
-        private readonly string[] ProCustomerAlbertMessageID = { /*Albert Account Elevation for Already Existing PRO*/ "f78a836d0e658f688778c0dfd08a7f19" };
-        private readonly string[] D2CCustomerAlbertMessageID = { /*Albert Account Elevation for Already Existing D2C*/ "b904aa97f0a394372c697288bd30cef4" };
+        private readonly string[] NewCustomerAlbertMessageID = { 
+            /*Albert Account Elevation for Net New PRO Accounts*/ "0bdb03eb0000000000000000000000106e3c", 
+            /*Albert Net New PRO - Subject Line Name Test Email*/ "7fdb4a27155056afda4e539dd26aced1",
+            /*Albert New PRO - Reduced Content NO Name Subject Line*/ "07a8b006116f0ae96a54042e936cba1f",
+            /*Albert New PRO - Reduced Content + Name Subject Line*/ "eb06064ddafc735abd24f49de71c0c71"
+        };
+        private readonly string[] ProCustomerAlbertMessageID = { 
+            /*Albert Account Elevation for Already Existing PRO*/ "f78a836d0e658f688778c0dfd08a7f19", 
+            /*Albert Existing PRO - Subject Line Name Test Email*/ "98818ea203596ba32372b32ba6a5f87e",
+            /*Albert Existing PRO - Reduced Content + Name Subject Line*/ "4a11ba0af5e44b261d708dcb62690aee",
+            /*Albert Existing PRO - Reduced Content NO Name Subject Line*/ "e9341e16adb3079ca04f27772b88ea5b"
+        };
+        private readonly string[] D2CCustomerAlbertMessageID = { 
+            /*Albert Account Elevation for Already Existing D2C*/ "b904aa97f0a394372c697288bd30cef4", 
+            /*Albert Existing D2C - Subject Line Name Test Email*/ "9a173e6082c847544e552e9de3deb5c6",
+            /*Albert Existing D2C - Reduced Content NO Name Subject Line*/ "fd39e615680927a6f3e18e9fc27706d4",
+            /*Albert Existing D2C - Reduced Content + Name Subject Line*/ "2fc1cd9ce17e5ccdbadec1cdfeb49778"
+        };
         private readonly string ProWelcomeMessageID = "59df810343334dde290123cc9a477f0b";
         private readonly string ProPasswordResetMessageID = "0bdb03eb0000000000000000000000107043";
         private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";

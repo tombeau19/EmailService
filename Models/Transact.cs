@@ -26,36 +26,18 @@ namespace BrontoTransactionalEndpoint.Models
             string OneWkToExpireMessageID = "832c37f898bc5f706b207f6f0cbb054a";
             string DayAfterExpireMessageID = "5aba812ac3c3433f65c0f13b306e36ec";
 
-            //Email Subject Lines - Set in NETSUITE BrontoEstFollowUpTriggerWFA.js
-            string ProEstimateSubject = "SUPPLY.com Estimate";
-            string OneWkToCloseSubject = "Status of";
-            string DayOfCloseSubject = "Checking in on your estimate";
-            string OneWkPastCloseSubject = "Estimate status for";
-            string TwoWkToExpireSubject = "is expiring soon!";
-            string OneWkToExpireSubject = "You have an expiring estimate";
-            string DayAfterExpireSubject = "Requesting Feedback";
-
             if (estimate.Department == "29")
             {
-                var messageType = estimate.Subject.Contains(ProEstimateSubject) ? ProEstimateMessageID :
-                    estimate.Subject.Contains(OneWkToCloseSubject) ? OneWkToCloseMessageID :
-                        estimate.Subject.Contains(DayOfCloseSubject) ? DayOfCloseMessageID :
-                            estimate.Subject.Contains(OneWkPastCloseSubject) ? OneWkPastCloseMessageID :
-                                estimate.Subject.Contains(TwoWkToExpireSubject) ? TwoWkToExpireMessageID :
-                                    estimate.Subject.Contains(OneWkToExpireSubject) ? OneWkToExpireMessageID :
-                                        estimate.Subject.Contains(DayAfterExpireSubject) ? DayAfterExpireMessageID : "";
+                var messageType = estimate.EstimateType == 1 ? OneWkToCloseMessageID :
+                        estimate.EstimateType == 2 ? DayOfCloseMessageID :
+                            estimate.EstimateType == 3 ? OneWkPastCloseMessageID :
+                                estimate.EstimateType == 4 ? TwoWkToExpireMessageID :
+                                    estimate.EstimateType == 5 ? OneWkToExpireMessageID :
+                                        estimate.EstimateType == 6 ? DayAfterExpireMessageID : ProEstimateMessageID;
 
-                if (messageType == "")
-                {
-                    //TODO throw error
-                    return $"Estimate Email Failed to send {estimate.Email}";
-                }
-                else
-                {
-                    var brontoResult = BrontoConnector.SendEstimateEmail(estimate, messageType).Result;
-                    var result = EstimateEmailResult(brontoResult, estimate);
-                    return result;
-                }
+                var brontoResult = BrontoConnector.SendEstimateEmail(estimate, messageType).Result;
+                var result = EstimateEmailResult(brontoResult, estimate);
+                return result;
             }
             else if (estimate.Department == "27" && estimate.Subject.Contains("SUPPLY.com"))
             {
@@ -73,16 +55,31 @@ namespace BrontoTransactionalEndpoint.Models
 
         internal static string ShippingConfirmation(Order order)
         {
+            //this was put on hold
+            //var itemsLeftToShip = 0;
+            //foreach (var item in order.LineItems)
+            //{
+            //    if (item.Shipped == false && item.Quantity > 0 && item.ListSection == false)
+            //    {
+            //        itemsLeftToShip += 1;
+            //    }
+            //}
+            //var entireOrderShipped = itemsLeftToShip == 0;
+
             if (order.Department == "29")
             {
+                //2019.08| Shipping Confirmation | SUPPLY.com Post-Purchase PRO | Your Entire Order has Shipped!
                 //SUPPLY.com Shipping Confirmation - PRO
+                //var messageId = entireOrderShipped ? "bae5ff316d97b84eeb6956918209f3ce" : "f3703ac72ea42b799b45cec77e8007c2";
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "f3703ac72ea42b799b45cec77e8007c2").Result;
                 var result = ShippingEmailResult(brontoResult, order);
                 return result;
             }
             else
             {
-                //SUPPLY.com Shipping Confirmation - PRO
+                //2019.08| Shipping Confirmation | SUPPLY.com Post-Purchase D2C | Your Entire Order has Shipped!
+                //SUPPLY.com Shipping Confirmation - D2C
+                //var messageId = entireOrderShipped ? "79e3a8979188d86c4dafa26479a2f67e" : "ed24176d6796a12b4b23514c932ec598";
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "ed24176d6796a12b4b23514c932ec598").Result;
                 var result = ShippingEmailResult(brontoResult, order);
                 return result;
@@ -95,7 +92,7 @@ namespace BrontoTransactionalEndpoint.Models
             {
                 //PAM - Albert - Net New PRO
                 var brontoResult = BrontoConnector.SendAccountEmail(customer, "72911a76cfa01d1225044d0d400053da").Result;
-                var result = EmailResult(brontoResult, customer); 
+                var result = EmailResult(brontoResult, customer);
                 return result;
             }
             else if (customer.IsPro == true)

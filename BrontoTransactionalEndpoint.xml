@@ -67,6 +67,13 @@
             <remarks>returns a string with the details of the Email Send attempt</remarks>
             <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
         </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.TriggerBrontoWorkflow(BrontoLibrary.Models.Customer)">
+            <summary>
+            Sends a keyword to trigger a Bronto workflow via API.
+            </summary>
+            <remarks>returns a string indicating whether or not the workflow was triggered</remarks>
+            <param name="customer">Customer Email with the customer Keyword are required to trigger the workflow</param>
+        </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.WelcomeEmail(BrontoLibrary.Models.Customer)">
             <summary>
             Sends a Pro Welcome Email.
