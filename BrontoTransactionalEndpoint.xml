@@ -18,6 +18,13 @@
             <remarks>returns a 1 when success and 0 when failed</remarks>
             <param name="repData"></param>
         </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.SyncController.SaveFieldsToBronto(BrontoLibrary.Models.Customer)">
+            <summary>
+            Endpoint called from NetSuite on creation of an Albert Task. This saves the URL the customer used to fill out the Albert to Bronto where we use it for marketing
+            </summary>
+            <remarks>returns true or false based on success</remarks>
+            <param name="customer"></param>
+        </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.OrderConfirmation(BrontoLibrary.Models.Order)">
             <summary>
             Sends an Order Confirmation Email. The template used is based on the order being SUPPLYnow(bool), Pro(Department == "29"), or D2C(Department == "27").

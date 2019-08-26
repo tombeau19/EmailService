@@ -3,6 +3,7 @@ using BrontoTransactionalEndpoint.Models;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using BrontoLibrary.Models;
+using BrontoLibrary;
 
 namespace BrontoTransactionalEndpoint.Controllers
 {
@@ -32,6 +33,19 @@ namespace BrontoTransactionalEndpoint.Controllers
         public int UpdateSalesRep(JObject repData)
         {
             return Sync.UpdateSalesRep(repData);
+        }
+
+        // POST api/SaveAlbertFieldsToBronto
+        /// <summary>
+        /// Endpoint called from NetSuite on creation of an Albert Task. This saves the URL the customer used to fill out the Albert to Bronto where we use it for marketing
+        /// </summary>
+        /// <remarks>returns true or false based on success</remarks>
+        /// <param name="customer"></param>
+        [HttpPost("SaveFieldsToBronto")]
+        public bool SaveFieldsToBronto(Customer customer)
+        {
+            var result = BrontoConnector.SyncFieldsToBronto(customer).Result;
+            return result;
         }
     }
 }

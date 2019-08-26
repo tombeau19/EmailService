@@ -55,23 +55,22 @@ namespace BrontoTransactionalEndpoint.Models
 
         internal static string ShippingConfirmation(Order order)
         {
-            //this was put on hold
-            //var itemsLeftToShip = 0;
-            //foreach (var item in order.LineItems)
-            //{
-            //    if (item.Shipped == false && item.Quantity > 0 && item.ListSection == false)
-            //    {
-            //        itemsLeftToShip += 1;
-            //    }
-            //}
-            //var entireOrderShipped = itemsLeftToShip == 0;
+            var itemsLeftToShip = 0;
+            foreach (var item in order.LineItems)
+            {
+                if (item.Shipped == false && item.Quantity > 0 && item.ListSection == false)
+                {
+                    itemsLeftToShip += 1;
+                }
+            }
+            var entireOrderShipped = itemsLeftToShip == 0;
 
             if (order.Department == "29")
             {
                 //2019.08| Shipping Confirmation | SUPPLY.com Post-Purchase PRO | Your Entire Order has Shipped!
                 //SUPPLY.com Shipping Confirmation - PRO
-                //var messageId = entireOrderShipped ? "bae5ff316d97b84eeb6956918209f3ce" : "f3703ac72ea42b799b45cec77e8007c2";
-                var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "f3703ac72ea42b799b45cec77e8007c2").Result;
+                var messageId = entireOrderShipped ? "bae5ff316d97b84eeb6956918209f3ce" : "f3703ac72ea42b799b45cec77e8007c2";
+                var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, messageId).Result;
                 var result = ShippingEmailResult(brontoResult, order);
                 return result;
             }
@@ -79,8 +78,8 @@ namespace BrontoTransactionalEndpoint.Models
             {
                 //2019.08| Shipping Confirmation | SUPPLY.com Post-Purchase D2C | Your Entire Order has Shipped!
                 //SUPPLY.com Shipping Confirmation - D2C
-                //var messageId = entireOrderShipped ? "79e3a8979188d86c4dafa26479a2f67e" : "ed24176d6796a12b4b23514c932ec598";
-                var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, "ed24176d6796a12b4b23514c932ec598").Result;
+                var messageId = entireOrderShipped ? "79e3a8979188d86c4dafa26479a2f67e" : "ed24176d6796a12b4b23514c932ec598";
+                var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, messageId).Result;
                 var result = ShippingEmailResult(brontoResult, order);
                 return result;
             }
