@@ -36,15 +36,35 @@ namespace BrontoTransactionalEndpoint.Models
                                         estimate.EstimateType == 6 ? DayAfterExpireMessageID : ProEstimateMessageID;
 
                 var brontoResult = BrontoConnector.SendEstimateEmail(estimate, messageType).Result;
+                string subjectLine;
+                try
+                {
+                    var messageInfo = BrontoConnector.ReadMessageInfo(messageType).Result;
+                    subjectLine = (string)messageInfo["subjectLine"];
+                }
+                catch
+                {
+                    subjectLine = "Error";
+                }
                 var result = EstimateEmailResult(brontoResult, estimate);
-                return result;
+                return $"{result} [{subjectLine.Replace("%%#estimate_number%%", estimate.EstimateNumber)}]";
             }
             else if (estimate.Department == "27" && estimate.EstimateType == 0)
             {
                 //Estimate - D2C
                 var brontoResult = BrontoConnector.SendEstimateEmail(estimate, "02e304b62399fb5ecd7a6a4325bfe4af").Result;
+                string subjectLine;
+                try
+                {
+                    var messageInfo = BrontoConnector.ReadMessageInfo("02e304b62399fb5ecd7a6a4325bfe4af").Result;
+                    subjectLine = (string)messageInfo["subjectLine"];
+                }
+                catch
+                {
+                    subjectLine = "Error retrieving message info from Bronto";
+                }
                 var result = EstimateEmailResult(brontoResult, estimate);
-                return result;
+                return $"{result} [{subjectLine.Replace("%%#estimate_number%%", estimate.EstimateNumber)}]";
             }
             else
             {
@@ -56,57 +76,62 @@ namespace BrontoTransactionalEndpoint.Models
         internal static string ShippingConfirmation(Order order)
         {
             var itemsLeftToShip = 0;
-            foreach (var item in order.LineItems)
+            var oneItemWithQtyOne = false;
+            if (order.LineItems.Count() > 1 || order.LineItems[0].Quantity > 1)
             {
-                if (item.Shipped == false && item.Quantity > 0 && item.ListSection == false)
+                foreach (var item in order.LineItems)
                 {
-                    itemsLeftToShip += 1;
+                    if (item.Shipped == false && item.Quantity > 0 && item.ListSection == false)
+                    {
+                        itemsLeftToShip += 1;
+                    }
                 }
             }
+            else
+            {
+                oneItemWithQtyOne = true;
+                itemsLeftToShip = 1;
+            }
+
             var entireOrderShipped = itemsLeftToShip == 0;
 
             if (order.Department == "29")
             {
                 //2019.08| Shipping Confirmation | SUPPLY.com Post-Purchase PRO | Your Entire Order has Shipped!
                 //SUPPLY.com Shipping Confirmation - PRO
-                var messageId = entireOrderShipped ? "bae5ff316d97b84eeb6956918209f3ce" : "f3703ac72ea42b799b45cec77e8007c2";
+                var messageId = entireOrderShipped ? "bae5ff316d97b84eeb6956918209f3ce" : oneItemWithQtyOne ? "6d6d6845555ed2af46b5f83459e10b8f" : "f3703ac72ea42b799b45cec77e8007c2";
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, messageId).Result;
+                string subjectLine;
+                try
+                {
+                    var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
+                    subjectLine = (string)messageInfo["subjectLine"];
+                }
+                catch
+                {
+                    subjectLine = "Error";
+                }
                 var result = ShippingEmailResult(brontoResult, order);
-                return result;
+                return $"{result} [{subjectLine.Replace("%%#order_number%%", order.OrderNumber)}]";
             }
             else
             {
                 //2019.08| Shipping Confirmation | SUPPLY.com Post-Purchase D2C | Your Entire Order has Shipped!
                 //SUPPLY.com Shipping Confirmation - D2C
-                var messageId = entireOrderShipped ? "79e3a8979188d86c4dafa26479a2f67e" : "ed24176d6796a12b4b23514c932ec598";
+                var messageId = entireOrderShipped ? "79e3a8979188d86c4dafa26479a2f67e" : oneItemWithQtyOne ? "3192036580580fb2a830cc4052b1bcde" : "ed24176d6796a12b4b23514c932ec598";
                 var brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, messageId).Result;
+                string subjectLine;
+                try
+                {
+                    var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
+                    subjectLine = (string)messageInfo["subjectLine"];
+                }
+                catch
+                {
+                    subjectLine = "Error retrieving message info from Bronto";
+                }
                 var result = ShippingEmailResult(brontoResult, order);
-                return result;
-            }
-        }
-
-        internal static string Promo(Customer customer)
-        {
-            if (customer.IsNew == true)
-            {
-                //PAM - Albert - Net New PRO
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "72911a76cfa01d1225044d0d400053da").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
-            }
-            else if (customer.IsPro == true)
-            {
-                //PAM - Albert - Existing PRO
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "028db216dfc93bd8901a626081a8f6f5").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
-            }
-            else
-            {
-                //PAM - Albert - Existing D2C
-                var brontoResult = BrontoConnector.SendAccountEmail(customer, "2e6670754405f6456860e1a45a0fa79f").Result;
-                var result = EmailResult(brontoResult, customer);
-                return result;
+                return $"{result} [{subjectLine.Replace("%%#order_number%%", order.OrderNumber)}]";
             }
         }
 
@@ -118,19 +143,6 @@ namespace BrontoTransactionalEndpoint.Models
 
         #region Helpers
 
-        private static string EmailResult(JObject brontoResult, Customer customer)
-        {
-            if ((int)brontoResult["errorCode"] != 0)
-            {
-                string error = $"Email Failed for {customer.Email}. Error Code: {(int)brontoResult["errorCode"]}. Error String: {(string)brontoResult["errorString"]}";
-                return error;
-            }
-            else
-            {
-                string success = $"Success, Email Sent to {customer.Email}";
-                return success;
-            }
-        }
         private static string ShippingEmailResult(JObject brontoResult, Order order)
         {
             if ((int)brontoResult["errorCode"] != 0)
