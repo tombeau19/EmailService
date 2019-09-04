@@ -41,8 +41,6 @@ namespace BrontoTransactionalEndpoint.Controllers
         private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";
         private readonly string ProPasswordUpdateMessageID = "0bdb03eb0000000000000000000000107052";
         private readonly string D2CPasswordUpdateMessageID = "4fffc12ab5e0b56a7e57a0762570bda0";
-        //private readonly string ProOrderConfirmationMessageID = "0bdb03eb00000000000000000000001068b3";
-        //private readonly string D2COrderConfirmationMessageID = "9892cace237d4f0dc466deb63c84bce1";
         private readonly string ProOrderConfirmationMessageIDNoLeadTime = "0b39302354461c9bee7ff0b653c130a3";
         private readonly string D2COrderConfirmationMessageIDNoLeadTime = "d9d916fef652b2f4c91654e79156bc45";
         private readonly string SUPPLYnowOrderConfirmationMessageID = "0bdb03eb0000000000000000000000106807";
@@ -86,15 +84,19 @@ namespace BrontoTransactionalEndpoint.Controllers
                 {
                     var messageInfo = BrontoConnector.ReadMessageInfo(messageType).Result;
                     subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoRespone = $"Success, Email Sent to {order.Email}" };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    OkObjectResult success = new OkObjectResult(responseObj);
+                    return Ok(success);
                 }
                 catch
                 {
-                    subjectLine = "Error";
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoRespone = $"Success, Email Sent to {order.Email}" };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    OkObjectResult success = new OkObjectResult(responseObj);
+                    return Ok(success);
                 }
-
-                OkObjectResult success = new OkObjectResult($"Success, Email Sent to {order.Email} [{subjectLine.Replace("%%#order_number%%", order.OrderNumber)}]");
-
-                return Ok(success);
             }
             else
             {

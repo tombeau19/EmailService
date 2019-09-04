@@ -41,13 +41,17 @@ namespace BrontoTransactionalEndpoint.Models
                 {
                     var messageInfo = BrontoConnector.ReadMessageInfo(messageType).Result;
                     subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#estimate_number%%", estimate.EstimateNumber), brontoResponse = ShippingEmailResult(brontoResult, estimate) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
                 }
                 catch
                 {
-                    subjectLine = "Error";
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoResponse = ShippingEmailResult(brontoResult, estimate) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
                 }
-                var result = EstimateEmailResult(brontoResult, estimate);
-                return $"{result} [{subjectLine.Replace("%%#estimate_number%%", estimate.EstimateNumber)}]";
             }
             else if (estimate.Department == "27" && estimate.EstimateType == 0)
             {
@@ -58,13 +62,17 @@ namespace BrontoTransactionalEndpoint.Models
                 {
                     var messageInfo = BrontoConnector.ReadMessageInfo("02e304b62399fb5ecd7a6a4325bfe4af").Result;
                     subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#estimate_number%%", estimate.EstimateNumber), brontoResponse = ShippingEmailResult(brontoResult, estimate) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
                 }
                 catch
                 {
-                    subjectLine = "Error retrieving message info from Bronto";
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoResponse = ShippingEmailResult(brontoResult, estimate) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
                 }
-                var result = EstimateEmailResult(brontoResult, estimate);
-                return $"{result} [{subjectLine.Replace("%%#estimate_number%%", estimate.EstimateNumber)}]";
             }
             else
             {
@@ -106,13 +114,17 @@ namespace BrontoTransactionalEndpoint.Models
                 {
                     var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
                     subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoResponse = ShippingEmailResult(brontoResult, order) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
                 }
                 catch
                 {
-                    subjectLine = "Error";
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoResponse = ShippingEmailResult(brontoResult, order) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
                 }
-                var result = ShippingEmailResult(brontoResult, order);
-                return $"{result} [{subjectLine.Replace("%%#order_number%%", order.OrderNumber)}]";
             }
             else
             {
@@ -125,13 +137,17 @@ namespace BrontoTransactionalEndpoint.Models
                 {
                     var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
                     subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoResponse = ShippingEmailResult(brontoResult, order) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
                 }
                 catch
                 {
-                    subjectLine = "Error retrieving message info from Bronto";
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoResponse = ShippingEmailResult(brontoResult, order) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
                 }
-                var result = ShippingEmailResult(brontoResult, order);
-                return $"{result} [{subjectLine.Replace("%%#order_number%%", order.OrderNumber)}]";
             }
         }
 
