@@ -57,13 +57,13 @@ namespace BrontoTransactionalEndpoint.Controllers
         public async Task<IActionResult> OrderConfirmation(Order order)
         {
             BrontoConnector.DeliveryType deliveryType = BrontoConnector.DeliveryType.transactional;
-            var messageType = order.SupplyNow ? SUPPLYnowOrderConfirmationMessageID : order.Department == "29" ? ProOrderConfirmationMessageIDNoLeadTime : D2COrderConfirmationMessageIDNoLeadTime;
+            var messageId = order.SupplyNow ? SUPPLYnowOrderConfirmationMessageID : order.Department == "29" ? ProOrderConfirmationMessageIDNoLeadTime : D2COrderConfirmationMessageIDNoLeadTime;
 
             writeResult brontoResult = new writeResult();
 
             try
             {
-                brontoResult = await BrontoConnector.SendOrderConfirmationEmail(messageType, deliveryType, order);
+                brontoResult = await BrontoConnector.SendOrderConfirmationEmail(messageId, deliveryType, order);
             }
             catch (Exception ex)
             {
@@ -79,24 +79,45 @@ namespace BrontoTransactionalEndpoint.Controllers
 
             if (WasSuccessful(brontoResult))
             {
-                string subjectLine;
-                try
+                if (order.OrderNumber.Contains("SO"))
                 {
-                    var messageInfo = BrontoConnector.ReadMessageInfo(messageType).Result;
-                    subjectLine = (string)messageInfo["subjectLine"];
-                    var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoRespone = $"Success, Email Sent to {order.Email}" };
-                    JObject responseObj = JObject.FromObject(responseData);
-                    OkObjectResult success = new OkObjectResult(responseObj);
-                    return Ok(success);
+                    string subjectLine;
+                    try
+                    {
+                        var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
+                        subjectLine = (string)messageInfo["subjectLine"];
+                        var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoRespone = $"Success, Email Sent to {order.Email}" };
+                        JObject responseObj = JObject.FromObject(responseData);
+                        OkObjectResult success = new OkObjectResult(responseObj);
+                        return Ok(success);
+                    }
+                    catch
+                    {
+                        subjectLine = "Error Setting Subject";
+                        var responseData = new { subject = subjectLine, brontoRespone = $"Success, Email Sent to {order.Email}" };
+                        JObject responseObj = JObject.FromObject(responseData);
+                        OkObjectResult success = new OkObjectResult(responseObj);
+                        return Ok(success);
+                    }
                 }
-                catch
+                else
                 {
-                    subjectLine = "Error Setting Subject";
-                    var responseData = new { subject = subjectLine, brontoRespone = $"Success, Email Sent to {order.Email}" };
-                    JObject responseObj = JObject.FromObject(responseData);
-                    OkObjectResult success = new OkObjectResult(responseObj);
-                    return Ok(success);
+                    try
+                    {
+                        var createBMR = NetsuiteController.CreateBrontoMessageRecord(order, messageId, NetsuiteController.MessageType.OrderConfirmation);
+                        if (string.IsNullOrEmpty(createBMR))
+                        {
+                            await TeamsHelper.SendError($"Error Creating BMR for: {order.Email}", $"{order.OrderNumber}");
+                        }
+                        return Ok();
+                    }
+                    catch (Exception ex)
+                    {
+                        await TeamsHelper.SendError($"Error Creating BMR for: {order.Email}, {order.OrderNumber}", $"{ex.Message}");
+                        return Ok();
+                    }
                 }
+
             }
             else
             {
@@ -144,11 +165,11 @@ namespace BrontoTransactionalEndpoint.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public Task<IActionResult> PasswordReset(Customer customer)
         {
-            var messageType = customer.IsPro ? ProPasswordResetMessageID : D2CPasswordResetMessageID;
+            var messageId = customer.IsPro ? ProPasswordResetMessageID : D2CPasswordResetMessageID;
 
-            return SendAccountEmail(customer, messageType);
+            return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.PasswordReset);
         }
-        
+
         /// <summary>
         /// Notifies user their password has been updated. The template used is based on the customer value IsPro(bool).
         /// </summary>
@@ -159,9 +180,9 @@ namespace BrontoTransactionalEndpoint.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public Task<IActionResult> PasswordUpdate(Customer customer)
         {
-            var messageType = customer.IsPro ? ProPasswordUpdateMessageID : D2CPasswordUpdateMessageID;
+            var messageId = customer.IsPro ? ProPasswordUpdateMessageID : D2CPasswordUpdateMessageID;
 
-            return SendAccountEmail(customer, messageType);
+            return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.PasswordUpdate);
         }
 
         /// <summary>
@@ -176,10 +197,10 @@ namespace BrontoTransactionalEndpoint.Controllers
         {
             Random rand = new Random();
 
-            var messageType = customer.IsNew ? NewCustomerAlbertMessageID[rand.Next(NewCustomerAlbertMessageID.Length)] :
+            var messageId = customer.IsNew ? NewCustomerAlbertMessageID[rand.Next(NewCustomerAlbertMessageID.Length)] :
                 customer.IsPro ? ProCustomerAlbertMessageID[rand.Next(ProCustomerAlbertMessageID.Length)] : D2CCustomerAlbertMessageID[rand.Next(D2CCustomerAlbertMessageID.Length)];
 
-            return SendAccountEmail(customer, messageType);
+            return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.AlbertAndPRORegistration);
         }
 
         /// <summary>
@@ -220,17 +241,17 @@ namespace BrontoTransactionalEndpoint.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public Task<IActionResult> WelcomeEmail(Customer customer)
         {
-            var messageType = ProWelcomeMessageID;
+            var messageId = ProWelcomeMessageID;
 
-            return SendAccountEmail(customer, messageType);
+            return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.WelcomeEmail);
         }
 
-        private async Task<IActionResult> SendAccountEmail(Customer customer, string messageType)
+        private async Task<IActionResult> SendAccountEmail(Customer customer, string messageId, NetsuiteController.MessageType messageType)
         {
             JObject brontoResult = null;
             try
             {
-                brontoResult = await BrontoConnector.SendAccountEmail(customer, messageType);
+                brontoResult = await BrontoConnector.SendAccountEmail(customer, messageId);
             }
             catch (Exception ex)
             {
@@ -247,7 +268,20 @@ namespace BrontoTransactionalEndpoint.Controllers
 
             if (WasSuccessful(brontoResult))
             {
-                return Ok();
+                try
+                {
+                    var createBMR = NetsuiteController.CreateBrontoMessageRecord(customer, messageId, messageType);
+                    if (string.IsNullOrEmpty(createBMR))
+                    {
+                        await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}", $"Message Type: {messageType}");
+                    }
+                    return Ok();
+                }
+                catch (Exception ex)
+                {
+                    await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}, Message Type: {messageType}", $"{ex.Message}");
+                    return Ok();
+                }
             }
             else
             {
