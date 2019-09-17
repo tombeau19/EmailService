@@ -268,20 +268,23 @@ namespace BrontoTransactionalEndpoint.Controllers
 
             if (WasSuccessful(brontoResult))
             {
-                try
+                Task.Run(async () =>
                 {
-                    var createBMR = NetsuiteController.CreateBrontoMessageRecord(customer, messageId, messageType);
-                    if (string.IsNullOrEmpty(createBMR))
+                    try
                     {
-                        await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}", $"Message Type: {messageType}");
+                        var createBMR = NetsuiteController.CreateBrontoMessageRecord(customer, messageId, messageType);
+                        if (string.IsNullOrEmpty(createBMR))
+                        {
+                            await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}", $"Message Type: {messageType}");
+                        }
                     }
-                    return Ok();
-                }
-                catch (Exception ex)
-                {
-                    await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}, Message Type: {messageType}", $"{ex.Message}");
-                    return Ok();
-                }
+                    catch (Exception ex)
+                    {
+                        await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}, Message Type: {messageType}", $"{ex.Message}");
+                    }
+                }).ConfigureAwait(false);
+                
+                return Ok();
             }
             else
             {
