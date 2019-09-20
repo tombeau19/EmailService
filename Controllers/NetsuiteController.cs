@@ -12,7 +12,7 @@ namespace BrontoTransactionalEndpoint.Controllers
 {
     public static class NetsuiteController
     {
-        public enum MessageType 
+        public enum MessageType
         {
             OrderConfirmation = 1,
             ShippingConfirmation,
@@ -95,7 +95,7 @@ namespace BrontoTransactionalEndpoint.Controllers
             {
                 email = customer.Email,
                 repMessage = "",
-                subject = subjectLine.Replace("%%#first_name%%", customer.FirstName),
+                subject = subjectLine.Replace("%%#first_name%%", !string.IsNullOrEmpty(customer.FirstName) ? Capitalize(customer.FirstName) : ""),
                 sendMessage = false,
                 confirmationNumber = false,
                 messageType = (int)messageType,
@@ -116,6 +116,21 @@ namespace BrontoTransactionalEndpoint.Controllers
             }
 
             return string.IsNullOrEmpty(result) ? "" : result;
+        }
+
+        private static string Capitalize(string name)
+        {
+            var trimmedName = name.Trim();
+            var words = trimmedName.ToLower().Split(' ');
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(words[i]))
+                {
+                    words[i] = char.ToUpper(words[i][0]) + words[i].Substring(1);
+                }
+            }
+
+            return string.Join(" ", words);
         }
     }
 

@@ -24,18 +24,9 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         #region Message IDs
-        private readonly string[] NewCustomerAlbertMessageID = { 
-            /*Albert New PRO - Reduced Content NO Name Subject Line*/ "07a8b006116f0ae96a54042e936cba1f",
-            /*Albert New PRO - Reduced Content + Name Subject Line*/ "eb06064ddafc735abd24f49de71c0c71"
-        };
-        private readonly string[] ProCustomerAlbertMessageID = { 
-            /*Albert Existing PRO - Reduced Content + Name Subject Line*/ "4a11ba0af5e44b261d708dcb62690aee",
-            /*Albert Existing PRO - Reduced Content NO Name Subject Line*/ "e9341e16adb3079ca04f27772b88ea5b"
-        };
-        private readonly string[] D2CCustomerAlbertMessageID = { 
-            /*Albert Existing D2C - Reduced Content NO Name Subject Line*/ "fd39e615680927a6f3e18e9fc27706d4",
-            /*Albert Existing D2C - Reduced Content + Name Subject Line*/ "2fc1cd9ce17e5ccdbadec1cdfeb49778"
-        };
+        private readonly string NewCustomerAlbertMessageID = "eb06064ddafc735abd24f49de71c0c71";
+        private readonly string ProCustomerAlbertMessageID = "4a11ba0af5e44b261d708dcb62690aee";
+        private readonly string D2CCustomerAlbertMessageID = "2fc1cd9ce17e5ccdbadec1cdfeb49778";
         private readonly string ProWelcomeMessageID = "59df810343334dde290123cc9a477f0b";
         private readonly string ProPasswordResetMessageID = "0bdb03eb0000000000000000000000107043";
         private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";
@@ -102,20 +93,24 @@ namespace BrontoTransactionalEndpoint.Controllers
                 }
                 else
                 {
-                    try
+                    _ = Task.Run(async () =>
                     {
-                        var createBMR = NetsuiteController.CreateBrontoMessageRecord(order, messageId, NetsuiteController.MessageType.OrderConfirmation);
-                        if (string.IsNullOrEmpty(createBMR))
+                        try
                         {
-                            await TeamsHelper.SendError($"Error Creating BMR for: {order.Email}", $"{order.OrderNumber}");
+                            var createBMR = NetsuiteController.CreateBrontoMessageRecord(order, messageId, NetsuiteController.MessageType.OrderConfirmation);
+                            if (string.IsNullOrEmpty(createBMR))
+                            {
+                                await TeamsHelper.SendError($"Error Creating BMR for: {order.Email}", $"{order.OrderNumber}");
+                            }
                         }
-                        return Ok();
-                    }
-                    catch (Exception ex)
-                    {
-                        await TeamsHelper.SendError($"Error Creating BMR for: {order.Email}, {order.OrderNumber}", $"{ex.Message}");
-                        return Ok();
-                    }
+                        catch (Exception ex)
+                        {
+                            await TeamsHelper.SendError($"Error Creating BMR for: {order.Email}, {order.OrderNumber}", $"{ex.Message}");
+                        }
+                    }).ConfigureAwait(false);
+
+
+                    return Ok();
                 }
 
             }
@@ -195,10 +190,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public Task<IActionResult> AccountElevation(Customer customer)
         {
-            Random rand = new Random();
-
-            var messageId = customer.IsNew ? NewCustomerAlbertMessageID[rand.Next(NewCustomerAlbertMessageID.Length)] :
-                customer.IsPro ? ProCustomerAlbertMessageID[rand.Next(ProCustomerAlbertMessageID.Length)] : D2CCustomerAlbertMessageID[rand.Next(D2CCustomerAlbertMessageID.Length)];
+            var messageId = customer.IsNew ? NewCustomerAlbertMessageID : customer.IsPro ? ProCustomerAlbertMessageID : D2CCustomerAlbertMessageID;
 
             return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.AlbertAndPRORegistration);
         }
@@ -268,20 +260,23 @@ namespace BrontoTransactionalEndpoint.Controllers
 
             if (WasSuccessful(brontoResult))
             {
-                try
+                _ = Task.Run(async () =>
                 {
-                    var createBMR = NetsuiteController.CreateBrontoMessageRecord(customer, messageId, messageType);
-                    if (string.IsNullOrEmpty(createBMR))
+                    try
                     {
-                        await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}", $"Message Type: {messageType}");
+                        var createBMR = NetsuiteController.CreateBrontoMessageRecord(customer, messageId, messageType);
+                        if (string.IsNullOrEmpty(createBMR))
+                        {
+                            await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}", $"Message Type: {messageType}");
+                        }
                     }
-                    return Ok();
-                }
-                catch (Exception ex)
-                {
-                    await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}, Message Type: {messageType}", $"{ex.Message}");
-                    return Ok();
-                }
+                    catch (Exception ex)
+                    {
+                        await TeamsHelper.SendError($"Error Creating BMR for: {customer.Email}, Message Type: {messageType}", $"{ex.Message}");
+                    }
+                }).ConfigureAwait(false);
+                
+                return Ok();
             }
             else
             {
