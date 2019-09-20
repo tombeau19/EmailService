@@ -95,7 +95,7 @@ namespace BrontoTransactionalEndpoint.Controllers
             {
                 email = customer.Email,
                 repMessage = "",
-                subject = subjectLine.Replace("%%#first_name%%", customer.FirstName),
+                subject = subjectLine.Replace("%%#first_name%%", !string.IsNullOrEmpty(customer.FirstName) ? Capitalize(customer.FirstName) : ""),
                 sendMessage = false,
                 confirmationNumber = false,
                 messageType = (int)messageType,
@@ -116,6 +116,35 @@ namespace BrontoTransactionalEndpoint.Controllers
             }
 
             return string.IsNullOrEmpty(result) ? "" : result;
+        }
+
+        private static string Capitalize(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return "";
+            }
+            else
+            {
+                var trimmedName = name.Trim();
+                var words = trimmedName.ToLower().Split(' ');
+                for (int i = 0; i < words.Length; i++)
+                {
+                    if (!string.IsNullOrEmpty(words[i]))
+                    {
+                        if (words[i] == "se" || words[i] == "sw" || words[i] == "ne" || words[i] == "nw" || words[i] == "Se" || words[i] == "Sw" || words[i] == "Ne" || words[i] == "Nw")
+                        {
+                            words[i] = words[i].ToUpper();
+                        }
+                        else
+                        {
+                            words[i] = char.ToUpper(words[i][0]) + words[i].Substring(1);
+                        }
+                    }
+                }
+
+                return string.Join(" ", words);
+            }
         }
     }
 
