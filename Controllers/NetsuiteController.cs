@@ -12,7 +12,7 @@ namespace BrontoTransactionalEndpoint.Controllers
 {
     public static class NetsuiteController
     {
-        public enum MessageType 
+        public enum MessageType
         {
             OrderConfirmation = 1,
             ShippingConfirmation,
@@ -120,31 +120,17 @@ namespace BrontoTransactionalEndpoint.Controllers
 
         private static string Capitalize(string name)
         {
-            if (string.IsNullOrEmpty(name))
+            var trimmedName = name.Trim();
+            var words = trimmedName.ToLower().Split(' ');
+            for (int i = 0; i < words.Length; i++)
             {
-                return "";
-            }
-            else
-            {
-                var trimmedName = name.Trim();
-                var words = trimmedName.ToLower().Split(' ');
-                for (int i = 0; i < words.Length; i++)
+                if (!string.IsNullOrEmpty(words[i]))
                 {
-                    if (!string.IsNullOrEmpty(words[i]))
-                    {
-                        if (words[i] == "se" || words[i] == "sw" || words[i] == "ne" || words[i] == "nw" || words[i] == "Se" || words[i] == "Sw" || words[i] == "Ne" || words[i] == "Nw")
-                        {
-                            words[i] = words[i].ToUpper();
-                        }
-                        else
-                        {
-                            words[i] = char.ToUpper(words[i][0]) + words[i].Substring(1);
-                        }
-                    }
+                    words[i] = char.ToUpper(words[i][0]) + words[i].Substring(1);
                 }
-
-                return string.Join(" ", words);
             }
+
+            return string.Join(" ", words);
         }
     }
 
