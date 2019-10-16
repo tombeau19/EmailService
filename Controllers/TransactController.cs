@@ -24,6 +24,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         #region Message IDs
+        private readonly string NewCustomerAlbertMessageIDWithToken = "6e4e0a6403ef5f14824707a65f97d59f";
         private readonly string[] NewCustomerAlbertMessageID = { "eb06064ddafc735abd24f49de71c0c71", "8b0ac620498a2a58f0d8496b0e97c92a" };
         private readonly string ProCustomerAlbertMessageID = "4a11ba0af5e44b261d708dcb62690aee";
         private readonly string D2CCustomerAlbertMessageID = "2fc1cd9ce17e5ccdbadec1cdfeb49778";
@@ -193,6 +194,22 @@ namespace BrontoTransactionalEndpoint.Controllers
             Random rand = new Random();
 
             var messageId = customer.IsNew ? NewCustomerAlbertMessageID[rand.Next(NewCustomerAlbertMessageID.Length)] : customer.IsPro ? ProCustomerAlbertMessageID : D2CCustomerAlbertMessageID;
+
+            return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.AlbertAndPRORegistration);
+        }
+
+        /// <summary>
+        /// Sends an Account Elevation Email.
+        /// </summary>
+        /// <remarks>returns a string with the details of the Email Send attempt</remarks>
+        /// <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
+        [HttpPost("AccountElevationWithToken")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public Task<IActionResult> AccountElevationWithToken(Customer customer)
+        {
+
+            var messageId = NewCustomerAlbertMessageIDWithToken;
 
             return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.AlbertAndPRORegistration);
         }
