@@ -199,16 +199,15 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         /// <summary>
-        /// Sends an Account Elevation Email.
+        /// Sends an Account Elevation Email with a Token instead of temp password.
         /// </summary>
-        /// <remarks>returns a string with the details of the Email Send attempt</remarks>
+        /// <remarks>returns a http response with the details of the Email Send attempt</remarks>
         /// <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
         [HttpPost("AccountElevationWithToken")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public Task<IActionResult> AccountElevationWithToken(Customer customer)
         {
-
             var messageId = NewCustomerAlbertMessageIDWithToken;
 
             return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.AlbertAndPRORegistration);
