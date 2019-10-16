@@ -67,6 +67,13 @@
             <remarks>returns a string with the details of the Email Send attempt</remarks>
             <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
         </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.AccountElevationWithToken(BrontoLibrary.Models.Customer)">
+            <summary>
+            Sends an Account Elevation Email.
+            </summary>
+            <remarks>returns a string with the details of the Email Send attempt</remarks>
+            <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
+        </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.Promo(BrontoLibrary.Models.Customer)">
             <summary>
             Sends a Specific Transactional Email based on current Promotion.
