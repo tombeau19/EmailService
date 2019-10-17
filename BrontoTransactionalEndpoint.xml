@@ -69,9 +69,9 @@
         </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.AccountElevationWithToken(BrontoLibrary.Models.Customer)">
             <summary>
-            Sends an Account Elevation Email.
+            Sends an Account Elevation Email with a Token instead of temp password.
             </summary>
-            <remarks>returns a string with the details of the Email Send attempt</remarks>
+            <remarks>returns a http response with the details of the Email Send attempt</remarks>
             <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
         </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.Promo(BrontoLibrary.Models.Customer)">
