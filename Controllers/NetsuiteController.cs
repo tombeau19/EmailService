@@ -33,17 +33,14 @@ namespace BrontoTransactionalEndpoint.Controllers
             string url = "https://634494.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=1645&deploy=1&compid=634494&h=e1e59bf71af6447a3e9f";
 
             string subjectLine;
-            //string html;
             try
             {
                 var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
                 subjectLine = (string)messageInfo["subjectLine"];
-                //html = (string)messageInfo["html"];
             }
             catch
             {
                 subjectLine = "Error Setting Subject";
-                //html = "Error Setting HTML";
             }
 
             var parameters = new
@@ -55,7 +52,6 @@ namespace BrontoTransactionalEndpoint.Controllers
                 sendMessage = false,
                 messageType = (int)messageType,
                 estimateType = false,
-                //html,
                 source = 2,
                 brontoResponse = $"Success, Email Sent to {order.Email}",
                 messageContent = JObject.FromObject(order).ToString().Replace("\r\n", "")
@@ -78,17 +74,14 @@ namespace BrontoTransactionalEndpoint.Controllers
             string url = "https://634494.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=1645&deploy=1&compid=634494&h=e1e59bf71af6447a3e9f";
 
             string subjectLine;
-            //string html;
             try
             {
                 var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
                 subjectLine = (string)messageInfo["subjectLine"];
-                //html = (string)messageInfo["html"];
             }
             catch
             {
                 subjectLine = "Error Setting Subject";
-                //html = "Error Setting HTML";
             }
 
             var parameters = new
@@ -100,7 +93,6 @@ namespace BrontoTransactionalEndpoint.Controllers
                 confirmationNumber = false,
                 messageType = (int)messageType,
                 estimateType = false,
-                //html,
                 source = 2,
                 brontoResponse = $"Success, Email Sent to {customer.Email}",
                 messageContent = JObject.FromObject(customer).ToString().Replace("\r\n", "")
