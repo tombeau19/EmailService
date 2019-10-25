@@ -28,7 +28,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         private readonly string[] NewCustomerAlbertMessageID = { "eb06064ddafc735abd24f49de71c0c71", "8b0ac620498a2a58f0d8496b0e97c92a" };
         private readonly string ProCustomerAlbertMessageID = "4a11ba0af5e44b261d708dcb62690aee";
         private readonly string D2CCustomerAlbertMessageID = "2fc1cd9ce17e5ccdbadec1cdfeb49778";
-        private readonly string ProWelcomeMessageID = "59df810343334dde290123cc9a477f0b";
+        private readonly string ProWelcomeMessageID = "7839592063da1c9b6e93fcc1a3961741";
         private readonly string ProPasswordResetMessageID = "0bdb03eb0000000000000000000000107043";
         private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";
         private readonly string ProPasswordUpdateMessageID = "0bdb03eb0000000000000000000000107052";
@@ -254,7 +254,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         {
             var messageId = ProWelcomeMessageID;
 
-            return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.WelcomeEmail);
+            return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.PROWelcomeAndOnboarding);
         }
 
         private async Task<IActionResult> SendAccountEmail(Customer customer, string messageId, NetsuiteController.MessageType messageType)

@@ -25,7 +25,7 @@ namespace BrontoTransactionalEndpoint.Controllers
             HouzzReviewRequest,
             PromoRep,
             PromoCompany,
-            WelcomeEmail
+            PROWelcomeAndOnboarding
         };
 
         public static string CreateBrontoMessageRecord(Order order, string messageId, MessageType messageType)
