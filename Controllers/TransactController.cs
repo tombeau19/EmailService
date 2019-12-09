@@ -78,7 +78,7 @@ namespace BrontoTransactionalEndpoint.Controllers
                     {
                         var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
                         subjectLine = (string)messageInfo["subjectLine"];
-                        var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoRespone = $"Success, Email Sent to {order.Email}" };
+                        var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoResponse = $"Success, Email Sent to {order.Email}" };
                         JObject responseObj = JObject.FromObject(responseData);
                         OkObjectResult success = new OkObjectResult(responseObj);
                         return Ok(success);
@@ -86,7 +86,7 @@ namespace BrontoTransactionalEndpoint.Controllers
                     catch
                     {
                         subjectLine = "Error Setting Subject";
-                        var responseData = new { subject = subjectLine, brontoRespone = $"Success, Email Sent to {order.Email}" };
+                        var responseData = new { subject = subjectLine, brontoResponse = $"Success, Email Sent to {order.Email}" };
                         JObject responseObj = JObject.FromObject(responseData);
                         OkObjectResult success = new OkObjectResult(responseObj);
                         return Ok(success);
