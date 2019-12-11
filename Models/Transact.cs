@@ -192,8 +192,17 @@ namespace BrontoTransactionalEndpoint.Models
 
         internal static string TriggerBrontoWorkflow(Customer customer)
         {
-            var brontoResult = BrontoConnector.TriggerBrontoWorkflow(customer).Result;
-            return brontoResult.ToString();
+            string result;
+            try
+            {
+                var brontoResult = BrontoConnector.TriggerBrontoWorkflow(customer).Result;
+                result = brontoResult.ToString();
+            }
+            catch (Exception e)
+            {
+                result = $"{e.ToString()}";
+            }
+            return result;
         }
 
         #region Helpers
