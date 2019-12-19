@@ -200,7 +200,7 @@ namespace BrontoTransactionalEndpoint.Models
             }
             catch (Exception e)
             {
-                result = $"{e.ToString()}";
+                result = $"{e.Message.ToString()}";
             }
             return result;
         }

@@ -318,7 +318,7 @@ namespace BrontoTransactionalEndpoint.Controllers
 
         private static bool WasSuccessful(writeResult result)
         {
-            return !(bool)result.results[0].isError;
+            return !result.results[0].isError;
         }
 
     }
