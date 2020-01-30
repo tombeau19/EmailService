@@ -24,9 +24,9 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         #region Message IDs
-        private readonly string[] NewCustomerAlbertMessageIDWithToken = { "6e4e0a6403ef5f14824707a65f97d59f", "8120e19feb130544962b56a019cd3a58" };
+        private readonly string NewCustomerAlbertMessageIDWithToken = "6e4e0a6403ef5f14824707a65f97d59f";
         private readonly string[] NewCustomerAlbertMessageID = { "eb06064ddafc735abd24f49de71c0c71", "8b0ac620498a2a58f0d8496b0e97c92a" };
-        private readonly string ProCustomerAlbertMessageID = "4a11ba0af5e44b261d708dcb62690aee";
+        private readonly string[] ProCustomerAlbertMessageID = { "4a11ba0af5e44b261d708dcb62690aee", "9c2b2ea08455aad38dd03816e85bd7e1" };
         private readonly string D2CCustomerAlbertMessageID = "2fc1cd9ce17e5ccdbadec1cdfeb49778";
         private readonly string[] ProWelcomeMessageID = { "7839592063da1c9b6e93fcc1a3961741", "9de3690d21c570717938d7a49afa2583" };
         private readonly string ProPasswordResetMessageID = "0bdb03eb0000000000000000000000107043";
@@ -193,7 +193,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         {
             Random rand = new Random();
 
-            var messageId = customer.IsNew ? NewCustomerAlbertMessageID[rand.Next(NewCustomerAlbertMessageID.Length)] : customer.IsPro ? ProCustomerAlbertMessageID : D2CCustomerAlbertMessageID;
+            var messageId = customer.IsNew ? NewCustomerAlbertMessageID[rand.Next(NewCustomerAlbertMessageID.Length)] : customer.IsPro ? ProCustomerAlbertMessageID[rand.Next(ProCustomerAlbertMessageID.Length)] : D2CCustomerAlbertMessageID;
 
             return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.AlbertAndPRORegistration);
         }
@@ -208,8 +208,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public Task<IActionResult> AccountElevationWithToken(Customer customer)
         {
-            Random rand = new Random();
-            var messageId = NewCustomerAlbertMessageIDWithToken[rand.Next(NewCustomerAlbertMessageIDWithToken.Length)];
+            var messageId = NewCustomerAlbertMessageIDWithToken;
 
             return SendAccountEmail(customer, messageId, NetsuiteController.MessageType.AlbertAndPRORegistration);
         }

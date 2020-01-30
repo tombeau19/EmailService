@@ -126,7 +126,7 @@ namespace BrontoTransactionalEndpoint.Models
             {
                 //2019.08| Shipping Confirmation | SUPPLY.com Post-Purchase PRO | Your Entire Order has Shipped!
                 //SUPPLY.com Shipping Confirmation - PRO
-                var messageId = entireOrderShipped ? "bae5ff316d97b84eeb6956918209f3ce" : oneItemWithQtyOne ? "6d6d6845555ed2af46b5f83459e10b8f" : "f3703ac72ea42b799b45cec77e8007c2";
+                var messageId = entireOrderShipped ? "bae5ff316d97b84eeb6956918209f3ce" : oneItemWithQtyOne ? "6d6d6845555ed2af46b5f83459e10b8f" : "6507586273138936702f579a6822cd55";
                 JObject brontoResult = null;
                 try
                 {
