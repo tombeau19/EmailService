@@ -35,7 +35,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         private readonly string D2CPasswordUpdateMessageID = "4fffc12ab5e0b56a7e57a0762570bda0";
         private readonly string ProOrderConfirmationMessageIDNoLeadTime = "0b39302354461c9bee7ff0b653c130a3";
         private readonly string D2COrderConfirmationMessageIDNoLeadTime = "d9d916fef652b2f4c91654e79156bc45";
-        private readonly string SUPPLYnowOrderConfirmationMessageID = "0bdb03eb0000000000000000000000106807";
+        private readonly string ProDeliverySuccessMessageID = "2887898c77d3e4986a4a13648dea2db3";
         #endregion
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         public async Task<IActionResult> OrderConfirmation(Order order)
         {
             BrontoConnector.DeliveryType deliveryType = BrontoConnector.DeliveryType.transactional;
-            var messageId = order.SupplyNow ? SUPPLYnowOrderConfirmationMessageID : order.Department == "29" ? ProOrderConfirmationMessageIDNoLeadTime : D2COrderConfirmationMessageIDNoLeadTime;
+            var messageId = order.Department == "29" ? ProOrderConfirmationMessageIDNoLeadTime : D2COrderConfirmationMessageIDNoLeadTime;
 
             writeResult brontoResult = new writeResult();
 
@@ -149,6 +149,69 @@ namespace BrontoTransactionalEndpoint.Controllers
         public string ShippingConfirmation(Order order)
         {
             return Transact.ShippingConfirmation(order);
+        }
+
+        /// <summary>
+        /// Sends a Delivery Update Email for Roadie Updates. Currently only Pro(Department == "29") will send an email.
+        /// </summary>
+        /// <remarks>returns a 200 or 500 code with details of success/failure</remarks>
+        /// <param name="order">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
+        [HttpPost("DeliveryUpdate")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeliveryUpdate(Order order)
+        {
+            JObject brontoResult = null;
+            var messageId = order.Department == "29" & order.DeliveryUpdate == "success" ? ProDeliverySuccessMessageID : "";
+            try
+            {
+                brontoResult = await BrontoConnector.SendDeliveryUpdateEmail(order, messageId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send delivery update email");
+                var details = new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Title = "Email failed to send"
+                };
+                await TeamsHelper.SendError($"Delivery Update Email failed: {order.Email}", $"{ex.Message}");
+                return StatusCode(500, details);
+            }
+
+            if (WasSuccessful(brontoResult))
+            {
+                string subjectLine;
+                try
+                {
+                    var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
+                    subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoResponse = $"Success, Email Sent to {order.Email}" };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    OkObjectResult success = new OkObjectResult(responseObj);
+                    return Ok(success);
+                }
+                catch
+                {
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoResponse = $"Success, Email Sent to {order.Email}" };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    OkObjectResult success = new OkObjectResult(responseObj);
+                    return Ok(success);
+                }
+            }
+            else
+            {
+                _logger.LogError("Email send failed for {email}. Error code: {brontoResult}", order.Email, brontoResult);
+                var details = new ProblemDetails
+                {
+                    Detail = brontoResult.ToString(),
+                    Title = "Delivery Update Email failed to send"
+                };
+
+                await TeamsHelper.SendError($"Delivery Update failed to send", $"Failed to send to {order.Email}. {brontoResult.ToString()}");
+                return StatusCode(500, details);
+            }
         }
 
         /// <summary>
