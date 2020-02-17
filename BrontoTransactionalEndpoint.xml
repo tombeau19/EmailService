@@ -46,6 +46,13 @@
             <remarks>returns a string with the details of the Email Send attempt</remarks>
             <param name="order">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
         </member>
+        <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.DeliveryUpdate(BrontoLibrary.Models.Order)">
+            <summary>
+            Sends a Delivery Update Email for Roadie Updates. Currently only Pro(Department == "29") will send an email.
+            </summary>
+            <remarks>returns a 200 or 500 code with details of success/failure</remarks>
+            <param name="order">For field names and datatypes, please reference BrontoLibrary Order Model, or the model on swagger</param>
+        </member>
         <member name="M:BrontoTransactionalEndpoint.Controllers.TransactController.PasswordReset(BrontoLibrary.Models.Customer)">
             <summary>
             Sends Password Reset Email. The template used is based on the customer value IsPro(bool).
