@@ -36,6 +36,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         private readonly string ProOrderConfirmationMessageIDNoLeadTime = "0b39302354461c9bee7ff0b653c130a3";
         private readonly string D2COrderConfirmationMessageIDNoLeadTime = "d9d916fef652b2f4c91654e79156bc45";
         private readonly string ProDeliverySuccessMessageID = "2887898c77d3e4986a4a13648dea2db3";
+        private readonly string ProDeliveryFailureMessageID = "1176a19817a76c7c09f81c7fe6160eff";
         #endregion
 
         /// <summary>
@@ -162,7 +163,16 @@ namespace BrontoTransactionalEndpoint.Controllers
         public async Task<IActionResult> DeliveryUpdate(Order order)
         {
             JObject brontoResult = null;
-            var messageId = order.Department == "29" & order.DeliveryUpdate == "success" ? ProDeliverySuccessMessageID : "";
+            string messageId;
+            if (order.Department == "29")
+            {
+                messageId = order.DeliveryUpdate == "success" ? ProDeliverySuccessMessageID : ProDeliveryFailureMessageID;
+            }
+            else
+            {
+                messageId = "";
+            }
+
             try
             {
                 brontoResult = await BrontoConnector.SendDeliveryUpdateEmail(order, messageId);
