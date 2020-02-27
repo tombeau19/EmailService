@@ -28,7 +28,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         private readonly string[] NewCustomerAlbertMessageID = { "eb06064ddafc735abd24f49de71c0c71", "8b0ac620498a2a58f0d8496b0e97c92a" };
         private readonly string[] ProCustomerAlbertMessageID = { "4a11ba0af5e44b261d708dcb62690aee", "9c2b2ea08455aad38dd03816e85bd7e1" };
         private readonly string D2CCustomerAlbertMessageID = "2fc1cd9ce17e5ccdbadec1cdfeb49778";
-        private readonly string ProWelcomeMessageID = "7839592063da1c9b6e93fcc1a3961741";
+        private readonly string[] ProWelcomeMessageID = { "7839592063da1c9b6e93fcc1a3961741", "0c1099179ac01d55871493e073136164" };
         private readonly string ProPasswordResetMessageID = "0bdb03eb0000000000000000000000107043";
         private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";
         private readonly string ProPasswordUpdateMessageID = "0bdb03eb0000000000000000000000107052";
@@ -326,7 +326,8 @@ namespace BrontoTransactionalEndpoint.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public Task<IActionResult> WelcomeEmail(Customer customer)
         {
-            return SendAccountEmail(customer, ProWelcomeMessageID, NetsuiteController.MessageType.PROWelcomeAndOnboarding);
+            Random rand = new Random();
+            return SendAccountEmail(customer, ProWelcomeMessageID[rand.Next(ProWelcomeMessageID.Length)], NetsuiteController.MessageType.PROWelcomeAndOnboarding);
         }
 
         private async Task<IActionResult> SendAccountEmail(Customer customer, string messageId, NetsuiteController.MessageType messageType)
