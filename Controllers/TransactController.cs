@@ -345,7 +345,7 @@ namespace BrontoTransactionalEndpoint.Controllers
                     Title = "Account Email failed to send"
                 };
 
-                await TeamsHelper.SendError($"Account Email failed: {customer.Email}", $"{ex.Message}");
+                await TeamsHelper.SendError($"Account Email failed: {customer.Email}", $"{ex.Message}. Message Type: {messageType}");
                 return StatusCode(500, details);
             }
 
@@ -378,7 +378,7 @@ namespace BrontoTransactionalEndpoint.Controllers
                     Title = "Account Email failed to send"
                 };
 
-                await TeamsHelper.SendError($"Account Email failed to send", $"Failed to send to {customer.Email}. {brontoResult.ToString()}");
+                await TeamsHelper.SendError($"Account Email failed to send", $"Failed to send to {customer.Email}. {brontoResult.ToString()}. Message Type: {messageType}");
                 return StatusCode(500, details);
             }
         }
