@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BrontoLibrary" Version="5.6.8" />
+    <PackageReference Include="BrontoLibrary" Version="5.6.9" />
     <PackageReference Include="Helper" Version="1.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="2.2.6" />
