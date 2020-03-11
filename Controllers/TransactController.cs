@@ -33,7 +33,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";
         private readonly string ProPasswordUpdateMessageID = "0bdb03eb0000000000000000000000107052";
         private readonly string D2CPasswordUpdateMessageID = "4fffc12ab5e0b56a7e57a0762570bda0";
-        private readonly string ProOrderConfirmationMessageIDNoLeadTime = "5a0722e0fd48e7a2e25cac63de5b708c";
+        private readonly string ProOrderConfirmationMessageIDNoLeadTime = "0b39302354461c9bee7ff0b653c130a3";
         private readonly string D2COrderConfirmationMessageIDNoLeadTime = "d9d916fef652b2f4c91654e79156bc45";
         private readonly string ProDeliverySuccessMessageID = "2887898c77d3e4986a4a13648dea2db3";
         private readonly string ProDeliveryFailureMessageID = "1176a19817a76c7c09f81c7fe6160eff";
