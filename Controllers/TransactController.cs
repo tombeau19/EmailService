@@ -37,9 +37,10 @@ namespace BrontoTransactionalEndpoint.Controllers
         private readonly string D2COrderConfirmationMessageIDNoLeadTime = "d9d916fef652b2f4c91654e79156bc45";
         private readonly string ProDeliverySuccessMessageID = "2887898c77d3e4986a4a13648dea2db3";
         private readonly string ProDeliveryFailureMessageID = "1176a19817a76c7c09f81c7fe6160eff";
-        private readonly string ProDeliveryUpdateMessageID = "1176a19817a76c7c09f81c7fe6160eff";
+        private readonly string ProDeliveryUpdateMessageID = "00edf56162abcc7ac51e0a16851981cb";
         private readonly string D2CDeliverySuccessMessageID = "e9eda5d45743d2fa6e1f6543f8cb2a2a";
         private readonly string D2CDeliveryFailureMessageID = "8d5a1f997fcb37a8b3681cc4a724841b";
+        private readonly string D2CDeliveryUpdateMessageID = "e3e03f33748217cd1b3203bad8293c3f";
         #endregion
 
         /// <summary>
@@ -169,11 +170,11 @@ namespace BrontoTransactionalEndpoint.Controllers
             string messageId;
             if (order.Department == "29")
             {
-                messageId = order.DeliveryUpdate == "success" ? ProDeliverySuccessMessageID : order.DeliveryUpdate == "failure" ? ProDeliveryFailureMessageID : "";
+                messageId = order.DeliveryUpdate == "success" ? ProDeliverySuccessMessageID : order.DeliveryUpdate == "failure" ? ProDeliveryFailureMessageID : ProDeliveryUpdateMessageID;
             }
             else
             {
-                messageId = order.DeliveryUpdate == "success" ? D2CDeliverySuccessMessageID : order.DeliveryUpdate == "failure" ? D2CDeliveryFailureMessageID : "";
+                messageId = order.DeliveryUpdate == "success" ? D2CDeliverySuccessMessageID : order.DeliveryUpdate == "failure" ? D2CDeliveryFailureMessageID : D2CDeliveryUpdateMessageID;
             }
 
             try
