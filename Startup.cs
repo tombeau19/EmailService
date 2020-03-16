@@ -25,7 +25,6 @@ namespace BrontoTransactionalEndpoint
             Configuration = configuration;
 
             var logFilePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "bronto.log");
-            var sqliteFilePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "logs.sqlite");
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
@@ -33,7 +32,6 @@ namespace BrontoTransactionalEndpoint
                 .WriteTo.Async(al =>
                 {
                     al.File(logFilePath, rollingInterval: RollingInterval.Day);
-                    al.SQLite(sqliteFilePath);
                     al.Console();
                 })
                 .Enrich.FromLogContext()
@@ -78,7 +76,7 @@ namespace BrontoTransactionalEndpoint
             {
                 app.UseHsts();
             }
-            
+
             app.UseMvc();
 
             app.UseSwagger();
