@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.OpenApi.Models;
 
 namespace BrontoTransactionalEndpoint
 {
@@ -48,18 +49,16 @@ namespace BrontoTransactionalEndpoint
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new Info
+                    new OpenApiInfo
                     {
                         Version = "v1",
                         Title = "BrontoTransactAPI",
                         Description = "Sends transactional emails through the Bronto Platform. Also, updates contacts in Bronto",
-                        Contact = new Contact() { Name = "SuiteSquad", Email = "t.beauregard@hmwallace.com" }
+                        Contact = new OpenApiContact() { Name = "SuiteSquad", Email = "t.beauregard@hmwallace.com" }
                     });
 
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "BrontoTransactionalEndpoint.xml");
                 c.IncludeXmlComments(filePath);
-                c.DescribeAllEnumsAsStrings();
-                c.DescribeStringEnumsInCamelCase();
 
                 c.OrderActionsBy(api => api.GroupName);
             });
