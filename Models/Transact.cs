@@ -25,6 +25,7 @@ namespace BrontoTransactionalEndpoint.Models
             string TwoWkToExpireMessageID = "d686d25c8ca178ecdaa95bcfb823ea4d";
             string OneWkToExpireMessageID = "832c37f898bc5f706b207f6f0cbb054a";
             string DayAfterExpireMessageID = "5aba812ac3c3433f65c0f13b306e36ec";
+            string D2CEstimateMessageID = "02e304b62399fb5ecd7a6a4325bfe4af";
 
             if (estimate.Department == "29")
             {
@@ -69,7 +70,7 @@ namespace BrontoTransactionalEndpoint.Models
                 JObject brontoResult = null;
                 try
                 {
-                    brontoResult = BrontoConnector.SendEstimateEmail(estimate, "02e304b62399fb5ecd7a6a4325bfe4af").Result;
+                    brontoResult = BrontoConnector.SendEstimateEmail(estimate, D2CEstimateMessageID).Result;
                 }
                 catch (Exception e)
                 {
@@ -79,7 +80,7 @@ namespace BrontoTransactionalEndpoint.Models
                 string subjectLine;
                 try
                 {
-                    var messageInfo = BrontoConnector.ReadMessageInfo("02e304b62399fb5ecd7a6a4325bfe4af").Result;
+                    var messageInfo = BrontoConnector.ReadMessageInfo(D2CEstimateMessageID).Result;
                     subjectLine = (string)messageInfo["subjectLine"];
                     var responseData = new { subject = subjectLine.Replace("%%#estimate_number%%", estimate.EstimateNumber), brontoResponse = EstimateEmailResult(brontoResult, estimate) };
                     JObject responseObj = JObject.FromObject(responseData);

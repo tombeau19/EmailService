@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BrontoTransactionalEndpoint.Models;
+using BrontoTransactionalEndpoint.Helpers;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System;
@@ -10,6 +11,7 @@ using BrontoLibrary.Models;
 using BrontoReference;
 using Microsoft.Extensions.Logging;
 using BrontoTransactionalEndpoint.Controllers;
+using Polly;
 
 namespace BrontoTransactionalEndpoint.Controllers
 {
@@ -22,6 +24,9 @@ namespace BrontoTransactionalEndpoint.Controllers
         {
             _logger = logger;
         }
+
+        private readonly int retryCount = 3;
+        private readonly TimeSpan delay = TimeSpan.FromSeconds(2);
 
         #region Message IDs
         private readonly string NewCustomerAlbertMessageIDWithToken = "6e4e0a6403ef5f14824707a65f97d59f";
@@ -57,21 +62,33 @@ namespace BrontoTransactionalEndpoint.Controllers
             var messageId = order.Department == "29" ? ProOrderConfirmationMessageIDNoLeadTime : D2COrderConfirmationMessageIDNoLeadTime;
 
             writeResult brontoResult = new writeResult();
+            int currentRetry = 0;
 
-            try
+            for(;;)
             {
-                brontoResult = await BrontoConnector.SendOrderConfirmationEmail(messageId, deliveryType, order);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send order confirmation email");
-                var details = new ProblemDetails
+                try
                 {
-                    Detail = ex.Message,
-                    Title = "Email failed to send"
-                };
-                await TeamsHelper.SendError($"Order Confirmation Email failed: {order.Email}", $"{ex.Message}");
-                return StatusCode(500, details);
+                    brontoResult = await BrontoConnector.SendOrderConfirmationEmail(messageId, deliveryType, order);
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    currentRetry++;
+                    _logger.LogError(ex, $"order confirmation email failed. attempt: {currentRetry}");
+                    bool doNotRetry = ex.Message.ToLower().Contains("suppression") || ex.Message.ToLower().Contains("bounce")
+                                        || ex.Message.ToLower().Contains("invalid") ? true : false;
+                    if (currentRetry >= this.retryCount || doNotRetry)
+                    {
+                        var details = new ProblemDetails
+                        {
+                            Detail = ex.Message,
+                            Title = "Email failed to send"
+                        };
+                        await TeamsHelper.SendError($"Order Confirmation Email failed: {order.Email}", $"{ex.Message}");
+                        return StatusCode(500, details);
+                    }
+                }
+                await Task.Delay(delay);
             }
 
             if (WasSuccessful(brontoResult))
@@ -114,7 +131,6 @@ namespace BrontoTransactionalEndpoint.Controllers
                             await TeamsHelper.SendError($"Error Creating BMR for: {order.Email}, {order.OrderNumber}", $"{ex.Message}");
                         }
                     }).ConfigureAwait(false);
-
 
                     return Ok();
                 }
@@ -291,23 +307,6 @@ namespace BrontoTransactionalEndpoint.Controllers
         }
 
         /// <summary>
-        /// Sends a Specific Transactional Email based on current Promotion.
-        /// </summary>
-        /// <remarks>returns a string with the details of the Email Send attempt</remarks>
-        /// <param name="customer">Customer Email, IsPro, and IsNew are mandatory fields. TempPassword is required if IsNew == true, meaning a Net New Pro</param>
-        [HttpPost("Promo")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult Promo(Customer customer)
-        {
-            var details = new ProblemDetails()
-            {
-                Title = "Promo Endpoint is OFF"
-            };
-            return StatusCode(500, details);
-        }
-
-        /// <summary>
         /// Sends a keyword to trigger a Bronto workflow via API.
         /// </summary>
         /// <remarks>returns a string indicating whether or not the workflow was triggered</remarks>
@@ -334,10 +333,27 @@ namespace BrontoTransactionalEndpoint.Controllers
 
         private async Task<IActionResult> SendAccountEmail(Customer customer, string messageId, NetsuiteController.MessageType messageType)
         {
+            var policy = Policy
+                .Handle<Exception>(e => !e.Message.ToLower().Contains("invalid"))
+                .Or<Exception>(e => !e.Message.ToLower().Contains("suppressed"))
+                .Or<Exception>(e => !e.Message.ToLower().Contains("bounce"))
+                .WaitAndRetryAsync(
+                    retryCount, 
+                    attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+                    (exception, attempt) =>
+                    {
+                        _logger.LogError($"Email send failed: {customer.Email}. Error: {exception.Message}. Attempt: {attempt}");
+                    }
+                );
+
             JObject brontoResult = null;
+
             try
             {
-                brontoResult = await BrontoConnector.SendAccountEmail(customer, messageId);
+                await policy.ExecuteAsync(async () =>
+                {
+                    brontoResult = await BrontoConnector.SendAccountEmail(customer, messageId);
+                });
             }
             catch (Exception ex)
             {

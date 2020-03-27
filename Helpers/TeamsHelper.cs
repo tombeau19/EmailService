@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Helper;
 
-namespace BrontoTransactionalEndpoint.Controllers
+namespace BrontoTransactionalEndpoint.Helpers
 {
     public static class TeamsHelper
     {
