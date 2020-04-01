@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using BrontoLibrary.Models;
 using BrontoReference;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 using BrontoTransactionalEndpoint.Controllers;
 using Polly;
 
@@ -333,10 +334,10 @@ namespace BrontoTransactionalEndpoint.Controllers
 
         private async Task<IActionResult> SendAccountEmail(Customer customer, string messageId, NetsuiteController.MessageType messageType)
         {
+            string[] doNotRetry = { "invalid", "bounce", "suppression" };
             var policy = Policy
-                .Handle<Exception>(e => !e.Message.ToLower().Contains("invalid"))
-                .Or<Exception>(e => !e.Message.ToLower().Contains("suppressed"))
-                .Or<Exception>(e => !e.Message.ToLower().Contains("bounce"))
+                .Handle<Exception>(e => !doNotRetry.Any(s => e.Message.ToLower().Contains(s)))
+                //.OrResult<JObject>(r => r["errorString"].Contains("101"))
                 .WaitAndRetryAsync(
                     retryCount, 
                     attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
