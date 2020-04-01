@@ -337,7 +337,6 @@ namespace BrontoTransactionalEndpoint.Controllers
             string[] doNotRetry = { "invalid", "bounce", "suppression" };
             var policy = Policy
                 .Handle<Exception>(e => !doNotRetry.Any(s => e.Message.ToLower().Contains(s)))
-                //.OrResult<JObject>(r => r["errorString"].Contains("101"))
                 .WaitAndRetryAsync(
                     retryCount, 
                     attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
