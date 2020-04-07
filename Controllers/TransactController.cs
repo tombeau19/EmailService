@@ -21,15 +21,36 @@ namespace BrontoTransactionalEndpoint.Controllers
     public class TransactController : ControllerBase
     {
         private readonly ILogger<TransactController> _logger;
+        private readonly string[] doNotRetry = { "invalid", /*"bounce",*/ "suppression" };
+        private readonly Polly.Retry.AsyncRetryPolicy _policy;
+        private readonly Polly.Retry.RetryPolicy _policy2;
         public TransactController(ILogger<TransactController> logger)
         {
             _logger = logger;
+            _policy = Policy
+                .Handle<Exception>(e => !doNotRetry.Any(s => e.Message.ToLower().Contains(s)))
+                .WaitAndRetryAsync(
+                    3,
+                    attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+                    (exception, attempt) =>
+                    {
+                        _logger.LogError($"Email send failed. Error: {exception.Message}. Delay: {attempt}");
+                    }
+                );
+            _policy2 = Policy
+                .Handle<Exception>(e => !doNotRetry.Any(s => e.Message.ToLower().Contains(s)))
+                .WaitAndRetry(
+                    3,
+                    attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+                    (exception, attempt) =>
+                    {
+                        _logger.LogError($"Email send failed. Error: {exception.Message}. Delay: {attempt}");
+                    }
+                );
         }
 
-        private readonly int retryCount = 3;
-        private readonly TimeSpan delay = TimeSpan.FromSeconds(2);
-
         #region Message IDs
+        //account emails
         private readonly string NewCustomerAlbertMessageIDWithToken = "6e4e0a6403ef5f14824707a65f97d59f";
         private readonly string[] NewCustomerAlbertMessageID = { "eb06064ddafc735abd24f49de71c0c71", "8b0ac620498a2a58f0d8496b0e97c92a" };
         private readonly string[] ProCustomerAlbertMessageID = { "4a11ba0af5e44b261d708dcb62690aee", "9c2b2ea08455aad38dd03816e85bd7e1" };
@@ -39,14 +60,32 @@ namespace BrontoTransactionalEndpoint.Controllers
         private readonly string D2CPasswordResetMessageID = "cef7902b45ddfecfc6ed14d9f4f714df";
         private readonly string ProPasswordUpdateMessageID = "0bdb03eb0000000000000000000000107052";
         private readonly string D2CPasswordUpdateMessageID = "4fffc12ab5e0b56a7e57a0762570bda0";
+        //order confirmations
         private readonly string ProOrderConfirmationMessageIDNoLeadTime = "0b39302354461c9bee7ff0b653c130a3";
         private readonly string D2COrderConfirmationMessageIDNoLeadTime = "d9d916fef652b2f4c91654e79156bc45";
+        //delivery updates -- roadie emails
         private readonly string ProDeliverySuccessMessageID = "2887898c77d3e4986a4a13648dea2db3";
         private readonly string ProDeliveryFailureMessageID = "1176a19817a76c7c09f81c7fe6160eff";
         private readonly string ProDeliveryUpdateMessageID = "00edf56162abcc7ac51e0a16851981cb";
         private readonly string D2CDeliverySuccessMessageID = "e9eda5d45743d2fa6e1f6543f8cb2a2a";
         private readonly string D2CDeliveryFailureMessageID = "8d5a1f997fcb37a8b3681cc4a724841b";
         private readonly string D2CDeliveryUpdateMessageID = "e3e03f33748217cd1b3203bad8293c3f";
+        //estimates
+        private readonly string ProEstimateMessageID = "0bdb03eb000000000000000000000010761b";
+        private readonly string OneWkToCloseMessageID = "c7fe3060fccfab3446bc9c4bc0ad95ce";
+        private readonly string DayOfCloseMessageID = "6daefecf836cd65fdf3640d1598fee54";
+        private readonly string OneWkPastCloseMessageID = "187b70784f747adf1ea5763d9e5b8440";
+        private readonly string TwoWkToExpireMessageID = "d686d25c8ca178ecdaa95bcfb823ea4d";
+        private readonly string OneWkToExpireMessageID = "832c37f898bc5f706b207f6f0cbb054a";
+        private readonly string DayAfterExpireMessageID = "5aba812ac3c3433f65c0f13b306e36ec";
+        private readonly string D2CEstimateMessageID = "02e304b62399fb5ecd7a6a4325bfe4af";
+        //shipping
+        private readonly string ProEntireOrderShipped = "bae5ff316d97b84eeb6956918209f3ce";
+        private readonly string ProOneItemQtyOne = "6d6d6845555ed2af46b5f83459e10b8f";
+        private readonly string ProShipping = "f3703ac72ea42b799b45cec77e8007c2";
+        private readonly string D2CEntireOrderShipped = "79e3a8979188d86c4dafa26479a2f67e";
+        private readonly string D2COneItemQtyOne = "3192036580580fb2a830cc4052b1bcde";
+        private readonly string D2CShipping = "ed24176d6796a12b4b23514c932ec598";
         #endregion
 
         /// <summary>
@@ -63,33 +102,23 @@ namespace BrontoTransactionalEndpoint.Controllers
             var messageId = order.Department == "29" ? ProOrderConfirmationMessageIDNoLeadTime : D2COrderConfirmationMessageIDNoLeadTime;
 
             writeResult brontoResult = new writeResult();
-            int currentRetry = 0;
-
-            for(;;)
+            try
             {
-                try
+                await _policy.ExecuteAsync(async () =>
                 {
                     brontoResult = await BrontoConnector.SendOrderConfirmationEmail(messageId, deliveryType, order);
-                    break;
-                }
-                catch (Exception ex)
+                });
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send account email");
+                var details = new ProblemDetails
                 {
-                    currentRetry++;
-                    _logger.LogError(ex, $"order confirmation email failed. attempt: {currentRetry}");
-                    bool doNotRetry = ex.Message.ToLower().Contains("suppression") || ex.Message.ToLower().Contains("bounce")
-                                        || ex.Message.ToLower().Contains("invalid") ? true : false;
-                    if (currentRetry >= this.retryCount || doNotRetry)
-                    {
-                        var details = new ProblemDetails
-                        {
-                            Detail = ex.Message,
-                            Title = "Email failed to send"
-                        };
-                        await TeamsHelper.SendError($"Order Confirmation Email failed: {order.Email}", $"{ex.Message}");
-                        return StatusCode(500, details);
-                    }
-                }
-                await Task.Delay(delay);
+                    Detail = ex.Message,
+                    Title = "Account Email failed to send"
+                };
+                await TeamsHelper.SendError($"Order Email failed: {order.Email}", $"{ex.Message}.");
+                return StatusCode(500, details);
             }
 
             if (WasSuccessful(brontoResult))
@@ -159,7 +188,79 @@ namespace BrontoTransactionalEndpoint.Controllers
         [HttpPost("EstimateEmail")]
         public string EstimateEmail(Estimate estimate)
         {
-            return Transact.EstimateEmail(estimate);
+            if (estimate.Department == "29")
+            {
+                var messageType = estimate.EstimateType == 1 ? OneWkToCloseMessageID :
+                        estimate.EstimateType == 2 ? DayOfCloseMessageID :
+                            estimate.EstimateType == 3 ? OneWkPastCloseMessageID :
+                                estimate.EstimateType == 4 ? TwoWkToExpireMessageID :
+                                    estimate.EstimateType == 5 ? OneWkToExpireMessageID :
+                                        estimate.EstimateType == 6 ? DayAfterExpireMessageID : ProEstimateMessageID;
+                JObject brontoResult = null;
+                try
+                {
+                    _policy2.Execute(() =>
+                    {
+                        brontoResult = BrontoConnector.SendEstimateEmail(estimate, messageType).Result;
+                    });
+                }
+                catch (Exception e)
+                {
+                    var failedSend = new { errorCode = 999, errorString = $"{e.Message}" };
+                    brontoResult = JObject.FromObject(failedSend);
+                }
+                string subjectLine;
+                try
+                {
+                    var messageInfo = BrontoConnector.ReadMessageInfo(messageType).Result;
+                    subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#estimate_number%%", estimate.EstimateNumber), brontoResponse = EstimateEmailResult(brontoResult, estimate) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
+                }
+                catch
+                {
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoResponse = EstimateEmailResult(brontoResult, estimate) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
+                }
+            }
+            else if (estimate.Department == "27" && estimate.EstimateType == 0)
+            {
+                //Estimate - D2C
+                JObject brontoResult = null;
+                try
+                {
+                    brontoResult = BrontoConnector.SendEstimateEmail(estimate, D2CEstimateMessageID).Result;
+                }
+                catch (Exception e)
+                {
+                    var failedSend = new { errorCode = 999, errorString = $"{e.Message}" };
+                    brontoResult = JObject.FromObject(failedSend);
+                }
+                string subjectLine;
+                try
+                {
+                    var messageInfo = BrontoConnector.ReadMessageInfo(D2CEstimateMessageID).Result;
+                    subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#estimate_number%%", estimate.EstimateNumber), brontoResponse = EstimateEmailResult(brontoResult, estimate) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
+                }
+                catch
+                {
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoResponse = EstimateEmailResult(brontoResult, estimate) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
+                }
+            }
+            else
+            {
+                var result = "D2C follow ups are turned off";
+                return result;
+            }
         }
 
         /// <summary>
@@ -170,7 +271,91 @@ namespace BrontoTransactionalEndpoint.Controllers
         [HttpPost("ShippingConfirmation")]
         public string ShippingConfirmation(Order order)
         {
-            return Transact.ShippingConfirmation(order);
+            var itemsLeftToShip = 0;
+            var oneItemWithQtyOne = false;
+            if (order.LineItems.Count() > 1 || order.LineItems[0].Quantity > 1)
+            {
+                foreach (var item in order.LineItems)
+                {
+                    if (item.Shipped == false && item.Quantity > 0 && item.ListSection == false)
+                    {
+                        itemsLeftToShip += 1;
+                    }
+                }
+            }
+            else
+            {
+                oneItemWithQtyOne = true;
+                itemsLeftToShip = 1;
+            }
+            var entireOrderShipped = itemsLeftToShip == 0;
+
+            if (order.Department == "29")
+            {
+                var messageId = entireOrderShipped ? ProEntireOrderShipped : oneItemWithQtyOne ? ProOneItemQtyOne : ProShipping;
+                JObject brontoResult = null;
+                try
+                {
+                    _policy2.Execute(() =>
+                    {
+                        brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, messageId).Result;
+                    });
+                }
+                catch (Exception e)
+                {
+                    var failedSend = new { errorCode = 999, errorString = $"{e.Message}" };
+                    brontoResult = JObject.FromObject(failedSend);
+                }
+                string subjectLine;
+                try
+                {
+                    var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
+                    subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoResponse = ShippingEmailResult(brontoResult, order) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
+                }
+                catch
+                {
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoResponse = ShippingEmailResult(brontoResult, order) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
+                }
+            }
+            else
+            {
+                var messageId = entireOrderShipped ? D2CEntireOrderShipped : oneItemWithQtyOne ? D2COneItemQtyOne : D2CShipping;
+                JObject brontoResult = null;
+                try
+                {
+                    _policy2.Execute(() =>
+                    {
+                        brontoResult = BrontoConnector.SendShippingConfirmationEmail(order, messageId).Result;
+                    });
+                }
+                catch (Exception e)
+                {
+                    var failedSend = new { errorCode = 999, errorString = $"{e.Message}" };
+                    brontoResult = JObject.FromObject(failedSend);
+                }
+                string subjectLine;
+                try
+                {
+                    var messageInfo = BrontoConnector.ReadMessageInfo(messageId).Result;
+                    subjectLine = (string)messageInfo["subjectLine"];
+                    var responseData = new { subject = subjectLine.Replace("%%#order_number%%", order.OrderNumber), brontoResponse = ShippingEmailResult(brontoResult, order) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
+                }
+                catch
+                {
+                    subjectLine = "Error Setting Subject";
+                    var responseData = new { subject = subjectLine, brontoResponse = ShippingEmailResult(brontoResult, order) };
+                    JObject responseObj = JObject.FromObject(responseData);
+                    return responseObj.ToString();
+                }
+            }
         }
 
         /// <summary>
@@ -196,7 +381,10 @@ namespace BrontoTransactionalEndpoint.Controllers
 
             try
             {
-                brontoResult = await BrontoConnector.SendDeliveryUpdateEmail(order, messageId);
+                await _policy.ExecuteAsync(async () =>
+                {
+                    brontoResult = await BrontoConnector.SendDeliveryUpdateEmail(order, messageId);
+                });
             }
             catch (Exception ex)
             {
@@ -315,7 +503,19 @@ namespace BrontoTransactionalEndpoint.Controllers
         [HttpPost("TriggerBrontoWorkflow")]
         public string TriggerBrontoWorkflow(Customer customer)
         {
-            return Transact.TriggerBrontoWorkflow(customer);
+            string workflowResult = "";
+            try
+            {
+                _policy2.Execute(() =>
+                {
+                    workflowResult = BrontoConnector.TriggerBrontoWorkflow(customer).Result.ToString();
+                });
+            }
+            catch (Exception e)
+            {
+                workflowResult = $"{e.Message.ToString()}";
+            }
+            return workflowResult;
         }
 
         /// <summary>
@@ -334,23 +534,10 @@ namespace BrontoTransactionalEndpoint.Controllers
 
         private async Task<IActionResult> SendAccountEmail(Customer customer, string messageId, NetsuiteController.MessageType messageType)
         {
-            string[] doNotRetry = { "invalid", "bounce", "suppression" };
-            var policy = Policy
-                .Handle<Exception>(e => !doNotRetry.Any(s => e.Message.ToLower().Contains(s)))
-                .WaitAndRetryAsync(
-                    retryCount, 
-                    attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
-                    (exception, attempt) =>
-                    {
-                        _logger.LogError($"Email send failed: {customer.Email}. Error: {exception.Message}. Attempt: {attempt}");
-                    }
-                );
-
             JObject brontoResult = null;
-
             try
             {
-                await policy.ExecuteAsync(async () =>
+                await _policy.ExecuteAsync(async () =>
                 {
                     brontoResult = await BrontoConnector.SendAccountEmail(customer, messageId);
                 });
@@ -402,16 +589,42 @@ namespace BrontoTransactionalEndpoint.Controllers
             }
         }
 
+        #region helpers
         private static bool WasSuccessful(JObject result)
         {
             return !(bool)result["isError"];
         }
-
         private static bool WasSuccessful(writeResult result)
         {
             return !result.results[0].isError;
         }
-
+        private static string ShippingEmailResult(JObject brontoResult, Order order)
+        {
+            if ((int)brontoResult["errorCode"] != 0)
+            {
+                string error = $"Email Failed for {order.Email}. {(string)brontoResult["errorString"]}";
+                return error;
+            }
+            else
+            {
+                string success = $"Success, Email Sent to {order.Email}";
+                return success;
+            }
+        }
+        private static string EstimateEmailResult(JObject brontoResult, Estimate estimate)
+        {
+            if ((int)brontoResult["errorCode"] != 0)
+            {
+                string error = $"Email Failed for {estimate.Email}. {(string)brontoResult["errorString"]}";
+                return error;
+            }
+            else
+            {
+                string success = $"Success, Email Sent to {estimate.Email}";
+                return success;
+            }
+        }
+        #endregion
     }
 
 }

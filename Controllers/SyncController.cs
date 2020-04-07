@@ -11,7 +11,6 @@ namespace BrontoTransactionalEndpoint.Controllers
     [ApiController]
     public class SyncController : Controller
     {
-        // POST api/UpdateContact
         /// <summary>
         /// Updates a contact in Bronto
         /// </summary>
@@ -22,8 +21,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         {
             return Sync.UpdateContact(contact);
         }
-
-        // POST api/UpdateSalesRep
+        
         /// <summary>
         /// When Changes are made to Sales Rep, this saves the rep to the BRONTO.MarketingSalesRepSyncLog to be udpated by the Sync project
         /// </summary>
@@ -34,8 +32,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         {
             return Sync.UpdateSalesRep(repData);
         }
-
-        // POST api/SaveAlbertFieldsToBronto
+        
         /// <summary>
         /// Endpoint called from NetSuite on creation of an Albert Task. This saves the URL the customer used to fill out the Albert to Bronto where we use it for marketing
         /// </summary>
@@ -44,8 +41,7 @@ namespace BrontoTransactionalEndpoint.Controllers
         [HttpPost("SaveFieldsToBronto")]
         public bool SaveFieldsToBronto(Customer customer)
         {
-            var result = BrontoConnector.SyncFieldsToBronto(customer).Result;
-            return result;
+            return BrontoConnector.SyncFieldsToBronto(customer).Result;
         }
     }
 }
