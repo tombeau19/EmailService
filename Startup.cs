@@ -16,7 +16,6 @@ using Serilog;
 using Serilog.Events;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
-using Polly;
 
 namespace BrontoTransactionalEndpoint
 {
