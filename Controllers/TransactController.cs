@@ -31,9 +31,9 @@ namespace BrontoTransactionalEndpoint.Controllers
                 .WaitAndRetryAsync(
                     3,
                     attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
-                    (exception, attempt) =>
+                    (exception, timeSpan, retryCount) =>
                     {
-                        _logger.LogError($"Email send failed. Error: {exception.Message}. Delay: {attempt}");
+                        _logger.LogError($"Email send failed. Error: {exception.Message}. Delay: {timeSpan}");
                     }
                 );
         }
@@ -100,7 +100,7 @@ namespace BrontoTransactionalEndpoint.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send account email");
+                _logger.LogError(ex, "Failed to send Order email");
                 var details = new ProblemDetails
                 {
                     Detail = ex.Message,
@@ -487,19 +487,17 @@ namespace BrontoTransactionalEndpoint.Controllers
         [HttpPost("TriggerBrontoWorkflow")]
         public string TriggerBrontoWorkflow(Customer customer)
         {
-            string workflowResult = "";
+            string result;
             try
             {
-                _policy2.Execute(() =>
-                {
-                    workflowResult = BrontoConnector.TriggerBrontoWorkflow(customer).Result.ToString();
-                });
+                var brontoResult = BrontoConnector.TriggerBrontoWorkflow(customer).Result;
+                result = brontoResult.ToString();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                workflowResult = $"{ex.Message.ToString()}";
+                result = $"{e.Message.ToString()}";
             }
-            return workflowResult;
+            return result;
         }
 
         /// <summary>
